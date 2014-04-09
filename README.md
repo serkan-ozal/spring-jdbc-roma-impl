@@ -835,13 +835,49 @@ For example:
 4.10. Complex Typed Field Features
 -------
 
-* **provideViaExpressionProvider:** With this configuration feature, 
+* **provideViaExpressionProvider:** With this configuration feature, you can use RXEL (ROMA Expression Language) expression language to providing field value.
+
+For example:
+~~~~~ java
+@RowMapperObjectField(
+	provideViaExpressionProvider = 
+		@RowMapperExpressionProvider(expression = "@{roleDAO}.getUserRoleList(${id})"))
+private List<Role> roles;
+~~~~~
 
 * **provideViaSqlProvider:** With this configuration feature, 
 
-* **provideViaCustomProvider:** With this configuration feature, 
+* **provideViaCustomProvider:** With this configuration feature, you can use your custom field value provider implementations by implementing **`org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperCustomProvider.RowMapperFieldProvider`** interface for providing value of field. Instance of your implementation is created once and used as singleton. 
+ 
+For example:
+~~~~~ java
+@RowMapperObjectField(
+	provideViaCustomProvider = 
+		@RowMapperCustomProvider(
+			fieldProvider = UserPhoneNumberFieldProvider.class))
+private String phoneNumber;
+~~~~~
 
-* **fieldType:** With this configuration feature, 
+and your custom field provider implementation is declared as like:
+
+~~~~~ java
+public class UserPhoneNumberFieldProvider implements RowMapperFieldProvider<User, String> {
+
+	private final static Logger logger = Logger.getLogger(UserPhoneNumberFieldProvider.class);
+	
+	@Override
+	public String provideField(User user, String fieldName, ResultSet rs, int rowNum) {
+		try {
+			return rs.getString("phone_number");
+		} 
+		catch (SQLException e) {
+			logger.error("Error occured while mapping field " + fieldName + " in User object from resultset", e);
+			return null;
+		}
+	}
+
+}
+~~~~~ 
 
 * **lazy:** With this configuration feature, you can configure this field as lazy permanently if **`lazyCondition`** is not specified. Note that specified field type must not **`final`** class.
 
