@@ -1212,7 +1212,7 @@ public class User {
 	@RowMapperObjectField(
 		provideViaCustomProvider = 
 			@RowMapperCustomProvider(
-					fieldMapper = UserPhoneNumberFieldMapper.class))
+					fieldProvider = UserPhoneNumberFieldProvider.class))
 	private String phoneNumber;
 	@RowMapperObjectField(
 		provideViaExpressionProvider = 
@@ -1226,84 +1226,92 @@ public class User {
 	@RowMapperEnumField(enumStartValue = 1)
 	private Language language;
 	@RowMapperEnumField(
-		mapViaAutoMapper = 
-			@RowMapperEnumAutoMapper(
-				mapViaNumericValueNumericMappings = {
-					@RowMapperEnumNumericValueNumericMapping(mappingIndex = 0 , value = 0),
-					@RowMapperEnumNumericValueNumericMapping(mappingIndex = 1 , value = 100),
-					@RowMapperEnumNumericValueNumericMapping(mappingIndex = 2 , value = 200),
-					@RowMapperEnumNumericValueNumericMapping(mappingIndex = 3 , value = 300),
-					@RowMapperEnumNumericValueNumericMapping(mappingIndex = 4 , value = 400),
-					@RowMapperEnumNumericValueNumericMapping(mappingIndex = 5 , value = 500),
-					@RowMapperEnumNumericValueNumericMapping(mappingIndex = 6 , value = 600),
-					@RowMapperEnumNumericValueNumericMapping(mappingIndex = 7 , value = 700)}))
+			mapViaAutoMapper = 
+				@RowMapperEnumAutoMapper(
+						mapViaNumericValueNumericMappings = {
+								@RowMapperEnumNumericValueNumericMapping(mappingIndex = 0, value = 0),
+								@RowMapperEnumNumericValueNumericMapping(mappingIndex = 1, value = 100),
+								@RowMapperEnumNumericValueNumericMapping(mappingIndex = 2, value = 200),
+								@RowMapperEnumNumericValueNumericMapping(mappingIndex = 3, value = 300),
+								@RowMapperEnumNumericValueNumericMapping(mappingIndex = 4, value = 400),
+								@RowMapperEnumNumericValueNumericMapping(mappingIndex = 5, value = 500),
+								@RowMapperEnumNumericValueNumericMapping(mappingIndex = 6, value = 600),
+								@RowMapperEnumNumericValueNumericMapping(mappingIndex = 7, value = 700)
+						}))
 	private Occupation occupation;
 	@RowMapperEnumField(
-		mapViaAutoMapper = 
-			@RowMapperEnumAutoMapper(
-				mapViaStringValueNumericMappings = {
-					@RowMapperEnumStringValueNumericMapping(mappingIndex = 0, value = "PRIMARY_SCHOOL"),
-					@RowMapperEnumStringValueNumericMapping(mappingIndex = 1, value = "SECONDARY_SCHOOL"),
-					@RowMapperEnumStringValueNumericMapping(mappingIndex = 2, value = "HIGH_SCHOOL"),
-					@RowMapperEnumStringValueNumericMapping(mappingIndex = 3, value = "BACHELOR"),
-					@RowMapperEnumStringValueNumericMapping(mappingIndex = 4, value = "MASTER"),
-					@RowMapperEnumStringValueNumericMapping(mappingIndex = 5, value = "PHD" ),
-					@RowMapperEnumStringValueNumericMapping(mappingIndex = 6, value = "ASSOCIATE_PROFESSOR"),
-					@RowMapperEnumStringValueNumericMapping(mappingIndex = 7, value = "PROFESSOR"),
-					@RowMapperEnumStringValueNumericMapping(mappingIndex = 8, value = "OTHER")}))
+			mapViaAutoMapper = 
+				@RowMapperEnumAutoMapper(
+						mapViaStringValueNumericMappings = {
+								@RowMapperEnumStringValueNumericMapping(mappingIndex = 0, value = "PRIMARY_SCHOOL"),
+								@RowMapperEnumStringValueNumericMapping(mappingIndex = 1, value = "SECONDARY_SCHOOL"),
+								@RowMapperEnumStringValueNumericMapping(mappingIndex = 2, value = "HIGH_SCHOOL"),
+								@RowMapperEnumStringValueNumericMapping(mappingIndex = 3, value = "BACHELOR"),
+								@RowMapperEnumStringValueNumericMapping(mappingIndex = 4, value = "MASTER"),
+								@RowMapperEnumStringValueNumericMapping(mappingIndex = 5, value = "PHD"),
+								@RowMapperEnumStringValueNumericMapping(mappingIndex = 6, value = "ASSOCIATE_PROFESSOR"),
+								@RowMapperEnumStringValueNumericMapping(mappingIndex = 7, value = "PROFESSOR"),
+								@RowMapperEnumStringValueNumericMapping(mappingIndex = 8, value = "OTHER")
+						}))
 	private Education education;
 	@RowMapperEnumField(
-		mapViaNumericMapper = 
-			@RowMapperEnumNumericMapper(
-						mapper = BloodTypeEnumMapper.class))
+			mapViaNumericMapper = 
+				@RowMapperEnumNumericMapper(
+							mapper = BloodTypeEnumMapper.class))
 	private BloodType bloodType;
 	@RowMapperEnumField(
-		mapViaStringMapper = 
-			@RowMapperEnumStringMapper(
-						mapper = MaritalStatusEnumMapper.class))
+			mapViaStringMapper = 
+				@RowMapperEnumStringMapper(
+							mapper = MaritalStatusEnumMapper.class))
 	private MaritalStatus maritalStatus;
 	@RowMapperEnumField(useStringValue = true)
 	private Religion religion;
 	@RowMapperObjectField(
-		provideViaExpressionProvider = 
-			@RowMapperExpressionProvider(
-				expression = "@{roleDAO}.getUserRoleList(${id})"),		
-		lazy = true,
-		lazyCondition = 
+			provideViaExpressionProvider = 
+				@RowMapperExpressionProvider(
+						expression = "@{roleDAO}.getUserRoleList(${id})"),		
+			lazy = true,
+			lazyCondition = 
 			@RowMapperLazyCondition(
-				provideViaCustomProvider = 
-					@RowMapperCustomLazyConditionProvider(
-						lazyConditionProvider = UserRolesLazyConditionProvider.class)))
+					provideViaCustomProvider = 
+						@RowMapperCustomLazyConditionProvider(
+								lazyConditionProvider = UserRolesLazyConditionProvider.class)))
 	private List<Role> roles;
 	@RowMapperObjectField(
-		provideViaExpressionProvider = 
-			@RowMapperExpressionProvider(
-				expression = "@{creditCardInfoDAO}.getUserCreditCardInfo(${id})"),		
-		lazy = true,
-		lazyCondition = 
-			@RowMapperLazyCondition(
-				provideViaPropertyBasedProvider = 
-					@RowMapperPropertyBasedLazyConditionProvider(
-						propertyName = "creditCardInfoLazyCondition")))
+			provideViaExpressionProvider = 
+				@RowMapperExpressionProvider(
+					expression = "@{creditCardInfoDAO}.getUserCreditCardInfo(${id})"),		
+			lazy = true,
+			lazyCondition = 
+				@RowMapperLazyCondition(
+					provideViaPropertyBasedProvider = 
+						@RowMapperPropertyBasedLazyConditionProvider(
+								propertyName = "creditCardInfoLazyCondition")))
 	private CreditCardInfo creditCardInfo;
 	@RowMapperObjectField(
-		provideViaExpressionProvider = 
-			@RowMapperExpressionProvider(
-				expression = "@{creditCardInfoDAO}.getUserSecondaryCreditCardInfo(${id})"),		
-		lazy = true,
-		lazyCondition = 
-		@RowMapperLazyCondition(
-			provideViaPropertyBasedProvider = 
-				@RowMapperPropertyBasedLazyConditionProvider(
-					propertyName = "creditCardInfoLazyCondition")))
+			provideViaExpressionProvider = 
+				@RowMapperExpressionProvider(
+					expression = "@{creditCardInfoDAO}.getUserSecondaryCreditCardInfo(${id})"),		
+			lazy = true,
+			lazyCondition = 
+			@RowMapperLazyCondition(
+					provideViaPropertyBasedProvider = 
+						@RowMapperPropertyBasedLazyConditionProvider(
+								propertyName = "creditCardInfoLazyCondition")))
 	private CreditCardInfo secondaryCreditCardInfo;
+	@RowMapperObjectField(
+			provideViaExpressionProvider = 
+				@RowMapperExpressionProvider(
+					expression = "@{creditCardInfoDAO}.getUserCreditCardInfo(${id})"),		
+			ignoreCondition = 
+				@RowMapperIgnoreCondition(
+					provideViaPropertyBasedProvider = 
+						@RowMapperPropertyBasedIgnoreConditionProvider(
+								propertyName = "creditCardInfoIgnoreCondition")))
+	private CreditCardInfo previousCreditCardInfo;
 	
 	@RowMapperIgnoreField // Or define field as transient
 	private byte age;
-    
-    	...
-    
-} 
 ~~~~~
 
 Here is `Role` class:    
@@ -1373,21 +1381,21 @@ public class MaritalStatusEnumMapper implements RowMapperEnumField.StringEnumMap
 }	
 ~~~~~
 
-Here is `UserPhoneNumberFieldMapper` class:  
+Here is `UserPhoneNumberFieldProvider` class:  
 
 ~~~~~ java
-public class UserPhoneNumberFieldMapper implements RowMapperFieldMapper<User> {
+public class UserPhoneNumberFieldProvider implements RowMapperFieldProvider<User, String> {
 
-	private final static Logger logger = Logger.getLogger(UserPhoneNumberFieldMapper.class);
+	private final static Logger logger = Logger.getLogger(UserPhoneNumberFieldProvider.class);
 	
 	@Override
-	public void mapField(User user, String fieldName, ResultSet rs, int rowNum) {
+	public String provideField(User user, String fieldName, ResultSet rs, int rowNum) {
 		try {
-			user.setPhoneNumber(rs.getString("phone_number"));
+			return rs.getString("phone_number");
 		} 
 		catch (SQLException e) {
-			logger.error("Error occured while mapping field " + fieldName + 
-					" in User object from resultset", e);
+			logger.error("Error occured while mapping field " + fieldName + " in User object from resultset", e);
+			return null;
 		}
 	}
 
@@ -1505,44 +1513,6 @@ We use **`@RowMapperObjectField`** annotation for accessing related `Role` entit
 We have **`lazy=true`** configuration, since `roles` field are initialized while we are accessing it first time. 
 If we don't access it, it will not be set. 
 
-In addition, we can define `User` entity with compilable pure Java code as follows:
- 
-~~~~~ java 
-public class User {
-
-    ...
-    
-    @RowMapperObjectField(
-        provideViaImplementationProvider = 
-            @RowMapperImplementationProvider(
-                provideCode = "RoleDAO.getUserRoleListAsStaticMethod(${id})", 
-                usedClasses = {RoleDAO.class}), 
-        lazy = true)
-    private List<Role> roles;
-    
-    ...
-    
-} 
-~~~~~
-
-
-Also, we can user our custom data provider classes these implement **`RowMapperObjectFieldDataProvider`** interface with its **`public Object provideData(T ownerObj)`** method. Here is sample usage:
-
-~~~~~ java   
-public class User {
-
-    ...
-    
-    @RowMapperObjectField(
-        provideViaCustomProvider = 
-            @RowMapperCustomProvider(
-                dataProvider = MyCustomDataProvider.class), 
-        lazy = true)
-    private List<Role> roles;
-    
-    ...
-    
-} 
 ~~~~~
 
 You can find all demo codes (including these samples above) at [https://github.com/serkan-ozal/spring-jdbc-roma-demo](https://github.com/serkan-ozal/spring-jdbc-roma-demo)
