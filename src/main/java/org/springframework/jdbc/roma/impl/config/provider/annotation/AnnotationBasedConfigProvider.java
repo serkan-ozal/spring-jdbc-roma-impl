@@ -273,7 +273,6 @@ public class AnnotationBasedConfigProvider implements ConfigProvider {
 												fieldProviderClass(rmCustomProvider.fieldProvider()).
 											build() :	
 										null).
-						fieldType(rmof.fieldType()).
 						lazy(rmof.lazy() || rmLazyConditionConfigExist || rmLazyLoadConditionConfigExist).
 						rowMapperLazyConditionConfig(rmLazyConditionConfig).
 						rowMapperLazyLoadConditionConfig(rmLazyLoadConditionConfig).

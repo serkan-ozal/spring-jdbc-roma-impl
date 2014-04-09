@@ -108,13 +108,7 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 	@SuppressWarnings("rawtypes")
 	protected String getValueFromCustomProvider(Field f, RowMapperObjectFieldConfig rmofc, 
 			Class<? extends RowMapperFieldProvider> rmfpCls, String setterMethodName) {
-		Class<?> fieldCls = f.getType();
 		rowMapper.addAdditionalClass(f.getType());
-		Class<?> fieldType = rmofc.getFieldType();
-		if (fieldType != null && fieldType.equals(Object.class) == false) {
-			fieldCls = fieldType;
-		}
-		rowMapper.addAdditionalClass(fieldCls);
 		
 		String
 			customProviderCreationCode = 
@@ -207,11 +201,6 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 
 		Class<?> fieldCls = f.getType();
 		rowMapper.addAdditionalClass(f.getType());
-		Class<?> fieldType = rmofc.getFieldType();
-		if (fieldType != null && fieldType.equals(Object.class) == false) {
-			fieldCls = fieldType;
-		}
-		rowMapper.addAdditionalClass(fieldCls);
 
 		if (Collection.class.isAssignableFrom(fieldCls) && List.class.isAssignableFrom(fieldCls) == false) {
 			logger.error("Only List type is supported for Collection typed fields " + "(field " + f.getName() + ")");
@@ -220,7 +209,7 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 		
 		Class<?> entityCls = rmofc.getRowMapperSqlProviderConfig().getEntityType();
 		if (entityCls == null || entityCls.equals(Object.class)) {
-			if (List.class.isAssignableFrom(fieldType)) {
+			if (List.class.isAssignableFrom(fieldCls)) {
 				logger.error("Entity type of List typed field named " + f.getName() + 
 							 " must be declared for SQL provider");
 				return "";
@@ -362,9 +351,6 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 					");";
 			}
 			else if (List.class.isAssignableFrom(fieldCls)) {
-				fieldCls = rmofc.getFieldType();
-				fieldClsName = fieldCls.getName();
-				rowMapper.addAdditionalClass(fieldCls);
 				code = 
 					variableDefinitions + "\n" +
 					GENERATED_OBJECT_NAME + "." + setterMethodName + "(" + 
@@ -379,9 +365,6 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 					");";
 			}
 			else if (Set.class.isAssignableFrom(fieldCls)) {
-				fieldCls = rmofc.getFieldType();
-				fieldClsName = fieldCls.getName();
-				rowMapper.addAdditionalClass(fieldCls);
 				code = 
 					variableDefinitions + "\n" +
 					GENERATED_OBJECT_NAME + "." + setterMethodName + "(" + 
@@ -396,9 +379,6 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 					");";
 			}
 			else if (Map.class.isAssignableFrom(fieldCls)) {
-				fieldCls = rmofc.getFieldType();
-				fieldClsName = fieldCls.getName();
-				rowMapper.addAdditionalClass(fieldCls);
 				code = 
 					variableDefinitions + "\n" +
 					GENERATED_OBJECT_NAME + "." + setterMethodName + "(" + 
@@ -413,34 +393,20 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 					");";
 			}
 			else {
-				Class<?> fieldType = rmofc.getFieldType();
-				if (fieldType != null && fieldType.equals(Object.class) == false) {
-					if (ReflectionUtil.canCreateInstance(fieldType)) {
-						rowMapper.addAdditionalClass(fieldCls);
-						code = 
-							variableDefinitions + "\n" +
-							GENERATED_OBJECT_NAME + "." + setterMethodName + "(" + 
-								"(" + f.getType().getName() + ")" + ProxyHelper.class.getName() + ".proxyObject(" + 
-									fieldClsName + ".class, " + 
-									ProxyObjectLoader.class.getName() + ".createProxyObjectLoader(" +
-										"\"" + rowMapper.getClazz().getName() + "$" + f.getName() + "\"" + ", " + 
-										"\"" + valueProvideCode + "\"" + ", " + 
-										"\"" + additionalClasses.toString() + "\"" + ", " + 
-										objectParamsBuilder.toString() +
-									")" +
-								")" + 
-							");";
-					}
-					else {
-						logger.debug("Cannot create instance of class " + fieldType.getName() + " for field " + f.getName() + ".");
-						return "";
-					}
-				}
-				else {
-					logger.debug("Cannot create instance of class " + fieldCls.getName() + " for field " + f.getName() + "." + 
-								 "Field types must be declared for interface or abstract class typed fields.");
-					return "";
-				}
+				rowMapper.addAdditionalClass(fieldCls);
+				code = 
+					variableDefinitions + "\n" +
+					GENERATED_OBJECT_NAME + "." + setterMethodName + "(" + 
+						"(" + f.getType().getName() + ")" + ProxyHelper.class.getName() + ".proxyObject(" + 
+							fieldClsName + ".class, " + 
+							ProxyObjectLoader.class.getName() + ".createProxyObjectLoader(" +
+								"\"" + rowMapper.getClazz().getName() + "$" + f.getName() + "\"" + ", " + 
+								"\"" + valueProvideCode + "\"" + ", " + 
+								"\"" + additionalClasses.toString() + "\"" + ", " + 
+								objectParamsBuilder.toString() +
+							")" +
+						")" + 
+					");";
 			}
 			
 			RowMapperLazyConditionConfig rmlcc = rmofc.getRowMapperLazyConditionConfig();
