@@ -835,7 +835,7 @@ For example:
 4.10. Complex Typed Field Features
 -------
 
-* **provideViaExpressionProvider:** With this configuration feature, you can use RXEL (ROMA Expression Language) expression language to providing field value.
+* **provideViaExpressionProvider:** With this configuration feature, you can use RXEL (ROMA Expression Language) expression language for providing field value.
 
 For example:
 ~~~~~ java
@@ -845,7 +845,48 @@ For example:
 private List<Role> roles;
 ~~~~~
 
-* **provideViaSqlProvider:** With this configuration feature, 
+* **provideViaSqlProvider:** With this configuration feature, you can specify SQL query will be executed to provide value of field by using limited supported version of RXEL. Only property (**`${...}`**) and resultset (**`&{[...]...}`**) based expressions are supported in specified SQL query. If your field is collection typed (Only List type is supported for SQL provide feature), you must specify element type by using **`entityType`** property. In addition, you can specify name of datasource where SQL query will be executed by using **`dataSourceName`** property.
+
+For example:
+~~~~~ java
+RowMapperObjectField(
+	provideViaSqlProvider = 
+		@RowMapperSqlProvider(
+	                provideSql = 
+	                    "SELECT p.* FROM PERMISSION p WHERE p.ID IN " +
+	                    "(" +
+	                        "SELECT rp.PERMISSION_ID FROM role_permission rp WHERE rp.ROLE_ID = ${id}" +
+	                    ") ORDER BY p.name",
+	                entityType = Permission.class),	    
+	        ...)
+private List<Permission> permissions;
+~~~~~ 
+
+Also, there are a way to customizing SQL query with its parameters by using your custom SQL query info provider implementations by implementing **`org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperSqlProvider.RowMapperSqlQueryInfoProvider`** interface for providing SQL query info. Instance of your implementation is created once and used as singleton. 
+ 
+For example:
+~~~~~ java
+@RowMapperObjectField(
+	provideViaSqlProvider = 
+		@RowMapperSqlProvider(
+			sqlQueryInfoProvider = UserPhoneNumberFieldProvider.class))
+private String phoneNumber;
+~~~~~
+
+and your custom SQL query info provider implementation is declared as like:
+
+~~~~~ java
+public class UserPhoneNumberFieldProvider implements RowMapperSqlQueryInfoProvider<User> {
+
+	private final static Logger logger = Logger.getLogger(UserPhoneNumberFieldProvider.class);
+	
+	@Override
+	public SqlQueryInfo provideSqlQueryInfo(User user, String fieldName) {
+		
+	}
+
+}
+~~~~~ 
 
 * **provideViaCustomProvider:** With this configuration feature, you can use your custom field value provider implementations by implementing **`org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperCustomProvider.RowMapperFieldProvider`** interface for providing value of field. Instance of your implementation is created once and used as singleton. 
  
