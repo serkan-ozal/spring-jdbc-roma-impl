@@ -862,27 +862,31 @@ RowMapperObjectField(
 private List<Permission> permissions;
 ~~~~~ 
 
-Also, there are a way to customizing SQL query with its parameters by using your custom SQL query info provider implementations by implementing **`org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperSqlProvider.RowMapperSqlQueryInfoProvider`** interface for providing SQL query info. Instance of your implementation is created once and used as singleton. 
+Also, there are a way to customizing SQL query with its parameters by using your custom SQL query info provider implementations by implementing **`org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperSqlProvider.RowMapperSqlQueryInfoProvider`** interface for providing SQL query info. Instance of your implementation is created once and used as singleton. Your custom SQL query info provider class returns a **`org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperSqlProvider.SqlQueryInfo`** typed object and this objects contains SQL query to execute and its parameters as **`Object[]`** array. Note that **RXEL** is **not supported** in SQL query for this feature and you must use **`?`** as placeholder for parameter in query.
  
 For example:
 ~~~~~ java
 @RowMapperObjectField(
 	provideViaSqlProvider = 
 		@RowMapperSqlProvider(
-			sqlQueryInfoProvider = UserPhoneNumberFieldProvider.class))
-private String phoneNumber;
+			sqlQueryInfoProvider = UserAccountInfoSqlQueryInfoProvider.class))
+private AccountInfo accountInfo;
 ~~~~~
 
 and your custom SQL query info provider implementation is declared as like:
 
 ~~~~~ java
-public class UserPhoneNumberFieldProvider implements RowMapperSqlQueryInfoProvider<User> {
+public class UserAccountInfoSqlQueryInfoProvider implements RowMapperSqlQueryInfoProvider<User> {
 
-	private final static Logger logger = Logger.getLogger(UserPhoneNumberFieldProvider.class);
-	
 	@Override
 	public SqlQueryInfo provideSqlQueryInfo(User user, String fieldName) {
-		
+		return 
+			new SqlQueryInfo(
+				"SELECT a.* FROM ACCOUNT_INFO a WHERE a.ID IN " +
+	            "(" +
+	                "SELECT ua.account_info_id FROM USER_ACCOUNT_INFO ua WHERE ua.user_id = ?" +
+	            ")",
+	            new Object[] { user.getId() });
 	}
 
 }
@@ -1510,6 +1514,25 @@ public class RoleNameFieldMapper implements RowMapperFieldMapper<Role> {
 
 }
 ~~~~~
+
+Here is `UserAccountInfoSqlQueryInfoProvider` class:  
+
+~~~~~ java
+public class UserAccountInfoSqlQueryInfoProvider implements RowMapperSqlQueryInfoProvider<User> {
+
+	@Override
+	public SqlQueryInfo provideSqlQueryInfo(User user, String fieldName) {
+		return 
+			new SqlQueryInfo(
+				"SELECT a.* FROM ACCOUNT_INFO a WHERE a.ID IN " +
+	            "(" +
+	                "SELECT ua.account_info_id FROM USER_ACCOUNT_INFO ua WHERE ua.user_id = ?" +
+	            ")",
+	            new Object[] { user.getId() });
+	}
+
+}
+~~~~~ 
 
 Here is `CreditCardInfoJdbcDAO` class:  
 
