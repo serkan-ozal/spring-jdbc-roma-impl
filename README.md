@@ -1,4 +1,9 @@
+CONTENTS
+=======
+
 [1. What is Spring-JDBC-ROMA?](## 1. What is Spring-JDBC-ROMA?)
+[2. Features](## 2. Features)
+[3. Installation](## 3. Installation)
 
 ## 1. What is Spring-JDBC-ROMA?
 =======
@@ -11,7 +16,7 @@ based rowmapper. It generates rowmapper on the fly like implementing as manual s
 It also supports object relations as lazy and eager. There are other lots of interesting features and 
 these features can be customized with developer's extended classes. 
 
-2. Features
+## 2. Features
 =======
 
 * All primitive types, strings, enums, dates, clob, blob, collections and complex objects are supported.  
@@ -29,7 +34,7 @@ these features can be customized with developer's extended classes.
 * Writing field access definitions as REXL (ROMA Expression Language) or as compilable Java code in annotation. XML and properties file configuration support will be added soon.  
 
 
-3. Installation
+## 3. Installation
 =======
 
 In your **pom.xml**, you must add repository and dependency for Spring-JDBC-ROMA. 
