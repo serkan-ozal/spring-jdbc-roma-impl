@@ -16,9 +16,13 @@ these features can be customized with developer's extended classes.
 
 * Writing your custom class (or type) based field generator factory, object creater, object processor, table name resolver, column name resolver implementations and customizable data source, schema, table names are supported.  
 
-* Writing your custom field based mapper, Spring based binder, SQL based binder, expression language based binder and custom binder implementations are supported.   
+* Writing your custom field based mapper, SQL based binder, expression language based binder and custom binder implementations are supported.   
  
-* Lazy or eager field accessing is supported. Lazy support can be configured as conditional and conditions can be provided as expression language or as custom lazy condition provider implementations.
+* Lazy or eager field accessing is supported. Lazy support can be configured as conditional and conditions can be provided as expression language or as custom lazy condition provider implementations. If lazy condition is not enable, specified field is not handled as lazy and set as eager while creating root entity.
+
+* Loading lazy fields can be enable or disable at runtime dynamically by using key based, expression based and custom implementation based approaches. If lazy-load condition is not enable, specified lazy field is not loaded no matter field is configured as lazy.
+
+* Ignoring fields can be enable or disable at runtime dynamically by using key based, expression based and custom implementation based approaches. This feature is very useful in some use-cases. For example, this feature can be used to ignore some fields while serializing to JSON at your specified controller and this behaviour doesn't effect other controllers.
 
 * Writing field access definitions as REXL (ROMA Expression Language) or as compilable Java code in annotation. XML and properties file configuration support will be added soon.  
 
