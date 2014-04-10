@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 
-import org.hsqldb.lib.StringUtil;
 import org.springframework.jdbc.roma.api.config.manager.ConfigManager;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperCustomProvider.RowMapperFieldProvider;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperIgnoreCondition.RowMapperIgnoreConditionProvider;
@@ -335,7 +334,7 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 				@SuppressWarnings("rawtypes")
 				Class<? extends RowMapperLazyLoadConditionProvider> lazyLoadConditionProviderClass = 
 						rmllcc.getLazyLoadConditionProviderClass();
-				if (StringUtil.isEmpty(propertyName) == false) {
+				if (StringUtils.isEmpty(propertyName) == false) {
 					valueProvideCode = 
 						"if " + "(" + "BeanUtil.getInstance().getLazyManager()" + 
 										".getLazyLoadConditionProperty" + "(" + "\\\"" + propertyName + "\\\"" + ")" + ")" +  
@@ -347,7 +346,7 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 							"return null;" + 
 						"}";
 				}
-				else if (StringUtil.isEmpty(expression) == false) {
+				else if (StringUtils.isEmpty(expression) == false) {
 					expression = processExpression(expression, variables, variableNames);
 					valueProvideCode = 
 						"if " + "(" + expression + ")" + 
@@ -465,7 +464,7 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 				@SuppressWarnings("rawtypes")
 				Class<? extends RowMapperLazyConditionProvider> lazyConditionProviderClass = 
 						rmlcc.getLazyConditionProviderClass();
-				if (StringUtil.isEmpty(propertyName) == false) {
+				if (StringUtils.isEmpty(propertyName) == false) {
 					code = 
 						variables.toString() + "\n" +	
 						"if " + "(" + "BeanUtil.getInstance().getLazyManager()" + ".getLazyConditionProperty" + "(" + "\"" + propertyName + "\"" + ")" + ")" + "\n" + 
@@ -477,7 +476,7 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 							RowMapperUtil.indent(generatedCode) + "\n" +
 						"}";
 				}
-				else if (StringUtil.isEmpty(expression) == false) {
+				else if (StringUtils.isEmpty(expression) == false) {
 					expression = processExpression(expression, variables, variableNames);
 					code = 
 						variables.toString() + "\n" +
@@ -533,7 +532,7 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 			@SuppressWarnings("rawtypes")
 			Class<? extends RowMapperIgnoreConditionProvider> ignoreConditionProviderClass = 
 					rmicc.getIgnoreConditionProviderClass();
-			if (StringUtil.isEmpty(propertyName) == false) {
+			if (StringUtils.isEmpty(propertyName) == false) {
 				generatedCode = 
 					variables.toString() + "\n" +	
 					"if " + "(" + "BeanUtil.getInstance().getIgnoreManager()" + 
@@ -542,7 +541,7 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 						RowMapperUtil.indent(generatedCode) + "\n" +
 					"}";
 			}
-			else if (StringUtil.isEmpty(expression) == false) {
+			else if (StringUtils.isEmpty(expression) == false) {
 				expression = processExpression(expression, variables, variableNames);
 				generatedCode = 
 					variables.toString() + "\n" +
