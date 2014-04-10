@@ -1,11 +1,29 @@
 CONTENTS
 =======
 
-[1. What is Spring-JDBC-ROMA?](## 1. What is Spring-JDBC-ROMA?)
-[2. Features](## 2. Features)
-[3. Installation](## 3. Installation)
+- [1. What is Spring-JDBC-ROMA?](#Section_1)
+- [2. Features](#Section_2)
+- [3. Installation](#Section_3)
+- [4. Usage](#Section_4)
+- [4.1. Default configurations](#Section_4_1)
+- [4.2. Primitive Typed Field Features](#Section_4_2)
+- [4.3. Date Typed Field Features](#Section_4_3)
+- [4.4. Clob Typed Column Features](#Section_4_4)
+- [4.5. Blob Typed Column Features](#Section_4_5)
+- [4.6. Enum Typed Field Features](#Section_4_6)
+- [4.7. Field Based Features Configuration Features](#Section_4_7)
+- [4.8. Class (or Type) Based Configuration Features](#Section_4_8)
+- [4.9. RXEL (ROMA Expression Language)](#Section_4_9)
+- [4.10. Complex Typed Field Features](#Section_4_10)
+- [4.11. Conditional Lazy Feature](#Section_4_11)
+- [4.12. Conditional Lazy-Load Feature](#Section_4_12)
+- [4.13. Conditional Ignore Feature](#Section_4_13)
+- [4.14. Other Features](#Section_4_14)
+- [5. A Simple Example](#Section_5)
+- [6. Roadmap](#Section_6)
 
-## 1. What is Spring-JDBC-ROMA?
+<a name="Section_1"></a>
+1. What is Spring-JDBC-ROMA?
 =======
 
 **Spring-JDBC-ROMA** is a rowmapper extension for **Spring-JDBC module**. 
@@ -16,7 +34,8 @@ based rowmapper. It generates rowmapper on the fly like implementing as manual s
 It also supports object relations as lazy and eager. There are other lots of interesting features and 
 these features can be customized with developer's extended classes. 
 
-## 2. Features
+<a name="Section_2"></a>
+2. Features
 =======
 
 * All primitive types, strings, enums, dates, clob, blob, collections and complex objects are supported.  
@@ -33,8 +52,8 @@ these features can be customized with developer's extended classes.
 
 * Writing field access definitions as REXL (ROMA Expression Language) or as compilable Java code in annotation. XML and properties file configuration support will be added soon.  
 
-
-## 3. Installation
+<a name="Section_3"></a>
+3. Installation
 =======
 
 In your **pom.xml**, you must add repository and dependency for Spring-JDBC-ROMA. 
@@ -77,7 +96,7 @@ And finally, in your **Spring context xml** file add following configuration to 
 ...
 ~~~~~
 
-
+<a name="Section_4"></a>
 4. Usage
 =======
 
@@ -92,6 +111,7 @@ RowMapperService rowMapperService;
 RowMapper<User> userRowMapper = rowMapperService.getRowMapper(User.class);
 ~~~~~
 
+<a name="Section_4_1"></a>
 4.1. Default configurations
 -------
 
@@ -117,6 +137,7 @@ Default configurations can be configured programatically or in context xml of Sp
 ...
 ~~~~~
 
+<a name="Section_4_2"></a>
 4.2. Primitive Typed Field Features
 -------
 
@@ -140,6 +161,7 @@ Default configurations can be configured programatically or in context xml of Sp
 
 typed fields are automatically mapped to result set in row mapper.
 
+<a name="Section_4_3"></a>
 4.3. Date Typed Field Features
 -------
 
@@ -150,7 +172,8 @@ typed fields are automatically mapped to result set in row mapper.
 private Date date;
 ~~~~~
 
-4.3. Clob Typed Column Features
+<a name="Section_4_4"></a>
+4.4. Clob Typed Column Features
 -------
 
 `CLOB` typed column can be mapped to **`java.lang.String`** typed field by using **`@RowMapperClobField`** annotation like this:
@@ -160,7 +183,8 @@ private Date date;
 private String address;
 ~~~~~
 
-4.4. Blob Typed Column Features
+<a name="Section_4_5"></a>
+4.5. Blob Typed Column Features
 -------
 `BLOB` typed column can be mapped to **`byte[]`** typed field by using **`@RowMapperBlobField`** annotation like this:
 
@@ -169,7 +193,8 @@ private String address;
 private byte[] image;
 ~~~~~
 
-4.5. Enum Typed Field Features
+<a name="Section_4_6"></a>
+4.6. Enum Typed Field Features
 -------
 
 By default, enums are mapped by using numeric column value as ordinal of enum. For example, you have an enum named `UserType` like this:
@@ -545,6 +570,7 @@ and enum field is declared as like:
 private Education education;
 ~~~~~
 
+<a name="Section_4_7"></a>
 4.7. Field Based Features Configuration Features
 -------
 General field configurations can be done by using **`@RowMappeField`** annotation.
@@ -636,6 +662,7 @@ public class RoleNameFieldMapper implements RowMapperFieldMapper<Role> {
 }
 ~~~~~
 
+<a name="Section_4_8"></a>
 4.8. Class (or Type) Based Configuration Features
 -------
 
@@ -810,6 +837,7 @@ public class UserTableNameResolver implements RowMapperTableNameResolver {
 }
 ~~~~~ 
 
+<a name="Section_4_9"></a>
 4.9. RXEL (ROMA Expression Language)
 -------
 
@@ -843,6 +871,7 @@ With **`&`** sign you can use result set attributes in your expression language.
 For example:
 `&{[int]enable} == 0 ? "false" : "true"` expression is executed as calling `getInt("enable")` method in result set and checks its value to return `true` or `false`.
 
+<a name="Section_4_10"></a>
 4.10. Complex Typed Field Features
 -------
 
@@ -943,6 +972,7 @@ public class UserPhoneNumberFieldProvider implements RowMapperFieldProvider<User
 
 * **ignoreCondition:** With this configuration feature, you can configure conditional ignore feature mentioned at section **`4.13. Conditional Ignore Feature`**.
 
+<a name="Section_4_11"></a>
 4.11. Conditional Lazy Feature
 -------
 
@@ -1044,6 +1074,7 @@ public class UserRolesLazyConditionProvider implements RowMapperLazyConditionPro
 }
 ~~~~~
 
+<a name="Section_4_12"></a>
 4.12. Conditional Lazy-Load Feature
 -------
 
@@ -1145,6 +1176,7 @@ public class UserRolesLazyLoadConditionProvider implements RowMapperLazyLoadCond
 }
 ~~~~~
 
+<a name="Section_4_13"></a>
 4.13. Conditional Ignore Feature
 -------
 
@@ -1246,11 +1278,13 @@ public class UserRolesIgnoreConditionProvider implements RowMapperIgnoreConditio
 }
 ~~~~~
 
+<a name="Section_4_14"></a>
 4.14. Other Features
 -------
 
 * **Ignoring field:** To hide field from row mapper, you can declare this field as **`transient`** or annotate it with **`@RowMapperIgnoreField`** annotation.
 
+<a name="Section_5"></a>
 5. A Simple Example
 =======
 
@@ -1592,8 +1626,7 @@ If we don't access it, it will not be set.
 
 You can find all demo codes (including these samples above) at [https://github.com/serkan-ozal/spring-jdbc-roma-demo](https://github.com/serkan-ozal/spring-jdbc-roma-demo)
  
- 
- 
+<a name="Section_6"></a> 
 6. Roadmap
 =======
 
