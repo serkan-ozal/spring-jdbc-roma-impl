@@ -22,6 +22,8 @@ import java.util.List;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperClass;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperCustomProvider;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperEnumField;
+import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperIgnoreCondition;
+import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperSqlProvider;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperEnumField.RowMapperEnumAutoMapper;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperEnumField.RowMapperEnumNumericMapper;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperEnumField.RowMapperEnumNumericValueNumericMapping;
@@ -30,11 +32,13 @@ import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperEnu
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperIgnoreField;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperExpressionProvider;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperLazyCondition;
+import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperIgnoreCondition.RowMapperPropertyBasedIgnoreConditionProvider;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperLazyCondition.RowMapperCustomLazyConditionProvider;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperLazyCondition.RowMapperPropertyBasedLazyConditionProvider;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperObjectField;
 import org.springframework.jdbc.roma.impl.integration.custom.BloodTypeEnumMapper;
 import org.springframework.jdbc.roma.impl.integration.custom.MaritalStatusEnumMapper;
+import org.springframework.jdbc.roma.impl.integration.custom.UserAccountInfoSqlQueryInfoProvider;
 import org.springframework.jdbc.roma.impl.integration.custom.UserObjectProcessor;
 import org.springframework.jdbc.roma.impl.integration.custom.UserPhoneNumberFieldProvider;
 import org.springframework.jdbc.roma.impl.integration.custom.UserRolesLazyConditionProvider;
@@ -140,6 +144,21 @@ public class User {
 						@RowMapperPropertyBasedLazyConditionProvider(
 								propertyName = "creditCardInfoLazyCondition")))
 	private CreditCardInfo secondaryCreditCardInfo;
+	@RowMapperObjectField(
+			provideViaExpressionProvider = 
+				@RowMapperExpressionProvider(
+					expression = "@{creditCardInfoDAO}.getUserCreditCardInfo(${id})"),		
+			ignoreCondition = 
+				@RowMapperIgnoreCondition(
+					provideViaPropertyBasedProvider = 
+						@RowMapperPropertyBasedIgnoreConditionProvider(
+								propertyName = "creditCardInfoIgnoreCondition")))
+	private CreditCardInfo previousCreditCardInfo;
+	@RowMapperObjectField(
+			provideViaSqlProvider = 
+				@RowMapperSqlProvider(
+					sqlQueryInfoProvider = UserAccountInfoSqlQueryInfoProvider.class))
+	private AccountInfo accountInfo;
 	
 	@RowMapperIgnoreField // Or define field as transient
 	private byte age;
@@ -304,6 +323,22 @@ public class User {
 		this.secondaryCreditCardInfo = secondaryCreditCardInfo;
 	}
 	
+	public CreditCardInfo getPreviousCreditCardInfo() {
+		return previousCreditCardInfo;
+	}
+	
+	public void setPreviousCreditCardInfo(CreditCardInfo previousCreditCardInfo) {
+		this.previousCreditCardInfo = previousCreditCardInfo;
+	}
+	
+	public AccountInfo getAccountInfo() {
+		return accountInfo;
+	}
+	
+	public void setAccountInfo(AccountInfo accountInfo) {
+		this.accountInfo = accountInfo;
+	}
+	
 	public byte getAge() {
 		return age;
 	}
@@ -332,6 +367,8 @@ public class User {
 				"Religion                   : " + religion					+ "\n" +
 				"Credit Card Info           : " + creditCardInfo			+ "\n" +
 				"Secondary Credit Card Info : " + secondaryCreditCardInfo	+ "\n" +
+				"Previous Credit Card Info  : " + previousCreditCardInfo	+ "\n" +
+				"Account Info               : " + accountInfo				+ "\n" +
 				"Age                        : " + age;
 	}
 	

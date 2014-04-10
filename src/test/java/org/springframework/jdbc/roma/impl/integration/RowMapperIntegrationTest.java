@@ -25,7 +25,9 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.roma.impl.integration.dao.UserDAO;
+import org.springframework.jdbc.roma.impl.integration.model.AccountInfo;
 import org.springframework.jdbc.roma.impl.integration.model.BloodType;
+import org.springframework.jdbc.roma.impl.integration.model.CreditCardInfo;
 import org.springframework.jdbc.roma.impl.integration.model.Education;
 import org.springframework.jdbc.roma.impl.integration.model.Gender;
 import org.springframework.jdbc.roma.impl.integration.model.Language;
@@ -41,7 +43,6 @@ import org.springframework.jdbc.roma.impl.integration.model.User;
  */
 public class RowMapperIntegrationTest extends BaseRomaIntegrationTest {
 	
-	
 	@Autowired
 	private UserDAO userDAO;
 
@@ -54,8 +55,12 @@ public class RowMapperIntegrationTest extends BaseRomaIntegrationTest {
 		
 		List<User> userList = userDAO.list();
 		
+		/////////////////////////////////////////////////////////////////////////////
+		
 		Assert.assertNotNull(userList);
 		Assert.assertEquals(1, userList.size());
+		
+		/////////////////////////////////////////////////////////////////////////////
 		
 		User user = userList.get(0);
 
@@ -76,6 +81,8 @@ public class RowMapperIntegrationTest extends BaseRomaIntegrationTest {
 		Assert.assertEquals(new Date(1986 - 1900, 9 - 1, 15), user.getBirthDate());
 		Assert.assertEquals("+901234567890", user.getPhoneNumber());
 		
+		/////////////////////////////////////////////////////////////////////////////
+		
 		List<Role> roleList = user.getRoles();
 		
 		Assert.assertNotNull(roleList);
@@ -86,6 +93,8 @@ public class RowMapperIntegrationTest extends BaseRomaIntegrationTest {
 		
 		Assert.assertEquals("Admin", roleAdmin.getName());
 		Assert.assertEquals("Member", roleMember.getName());
+		
+		/////////////////////////////////////////////////////////////////////////////
 		
 		List<Permission> adminPermissionList = roleAdmin.getPermissions();
 		List<Permission> memberPermissionList = roleMember.getPermissions();
@@ -108,6 +117,40 @@ public class RowMapperIntegrationTest extends BaseRomaIntegrationTest {
 		Assert.assertEquals("MEMBER_GET_PERM", memberPermissionList.get(1).getName());
 		Assert.assertEquals("MEMBER_LIST_PERM", memberPermissionList.get(2).getName());
 		Assert.assertEquals("MEMBER_UPDATE_PERM", memberPermissionList.get(3).getName());
+		
+		CreditCardInfo creditCardInfo = user.getCreditCardInfo();
+		
+		Assert.assertNotNull(creditCardInfo);
+		Assert.assertEquals("1234-5678-9000", creditCardInfo.getCreditCardNumber());
+		Assert.assertEquals(123, creditCardInfo.getSecurityCode());
+		Assert.assertEquals(new Date(2020 - 1900, 12 - 1, 31), creditCardInfo.getExpirationDate());
+		
+		/////////////////////////////////////////////////////////////////////////////
+		
+		CreditCardInfo secondaryCreditCardInfo = user.getSecondaryCreditCardInfo();
+		
+		Assert.assertNotNull(secondaryCreditCardInfo);
+		Assert.assertEquals("9876-5432-1000", secondaryCreditCardInfo.getCreditCardNumber());
+		Assert.assertEquals(456, secondaryCreditCardInfo.getSecurityCode());
+		Assert.assertEquals(new Date(2030 - 1900, 12 - 1, 31), secondaryCreditCardInfo.getExpirationDate());
+		
+		/////////////////////////////////////////////////////////////////////////////
+		
+		CreditCardInfo previousCreditCardInfo = user.getPreviousCreditCardInfo();
+		
+		Assert.assertNull(previousCreditCardInfo);
+		
+		/////////////////////////////////////////////////////////////////////////////
+		
+		AccountInfo accountInfo = user.getAccountInfo();
+		
+		Assert.assertNotNull(accountInfo);
+		Assert.assertEquals("123456789", accountInfo.getIban());
+		Assert.assertEquals("1234", accountInfo.getBankCode());
+		Assert.assertEquals("56789", accountInfo.getAccountNo());
+		Assert.assertEquals("13579", accountInfo.getCustomerNo());
+		
+		/////////////////////////////////////////////////////////////////////////////
 		
 		rowMapperService.disableIgnoreConditionProperty("creditCardInfoIgnoreCondition");
 		

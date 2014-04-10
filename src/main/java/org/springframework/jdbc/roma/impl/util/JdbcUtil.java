@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperSqlProvider.SqlQueryInfo;
 import org.springframework.util.StringUtils;
 
 /**
@@ -79,6 +80,10 @@ public class JdbcUtil {
 		else {
 			return (T)jdbcTemplate.queryForObject(sql, args, rowMapper);
 		}
+	}
+	
+	public static <T> T runSql(Class<?> fieldType, JdbcTemplate jdbcTemplate, SqlQueryInfo sqlQueryInfo, RowMapper<?> rowMapper) {
+		return runSql(fieldType, jdbcTemplate, sqlQueryInfo.sqlQuery, sqlQueryInfo.args, rowMapper);
 	}
 	
 }

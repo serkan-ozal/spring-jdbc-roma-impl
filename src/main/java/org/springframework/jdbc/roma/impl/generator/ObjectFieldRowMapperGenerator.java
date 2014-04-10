@@ -31,6 +31,7 @@ import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperCus
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperIgnoreCondition.RowMapperIgnoreConditionProvider;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperLazyCondition.RowMapperLazyConditionProvider;
 import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperLazyLoadCondition.RowMapperLazyLoadConditionProvider;
+import org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperSqlProvider.RowMapperSqlQueryInfoProvider;
 import org.springframework.jdbc.roma.api.domain.model.config.RowMapperCustomProviderConfig;
 import org.springframework.jdbc.roma.api.domain.model.config.RowMapperExpressionProviderConfig;
 import org.springframework.jdbc.roma.api.domain.model.config.RowMapperIgnoreConditionConfig;
@@ -49,6 +50,7 @@ import org.springframework.jdbc.roma.impl.proxy.ProxySetLoader;
 import org.springframework.jdbc.roma.impl.util.ReflectionUtil;
 import org.springframework.jdbc.roma.impl.util.RowMapperUtil;
 import org.springframework.jdbc.roma.impl.util.SpringUtil;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Serkan ÖZAL
@@ -82,7 +84,7 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 					rmofc.getRowMapperExpressionProviderConfig();
 			String expression = rmExpressionProviderConfig != null ? 
 									rmExpressionProviderConfig.getExpression() : null;
-			if (expression != null && expression.length() > 0) {
+			if (StringUtils.isEmpty(expression) == false) {
 				return 
 					wrapWithExceptionHandling(
 						wrapWithIgnoreConditionIfNeeded(f, rmofc, 	
@@ -91,12 +93,16 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 			else {
 				RowMapperSqlProviderConfig rmSqlProviderConfig = rmofc.getRowMapperSqlProviderConfig();
 				String sqlCode = rmSqlProviderConfig != null ? rmSqlProviderConfig.getProvideSql() : null;
-				if (sqlCode != null && sqlCode.length() > 0) {
+				Class<? extends RowMapperSqlQueryInfoProvider> sqlQueryInfoProviderClass = 
+						rmSqlProviderConfig.getSqlQueryInfoProviderClass();
+				if (StringUtils.isEmpty(sqlCode) == false ||
+						(sqlQueryInfoProviderClass != null && 
+							sqlQueryInfoProviderClass.equals(RowMapperSqlQueryInfoProvider.class) == false)) {
 					return 
 						wrapWithExceptionHandling(
 							wrapWithIgnoreConditionIfNeeded(f, rmofc, 	
-									getValueFromSqlCode(f, rmofc, sqlCode, 
-											rmSqlProviderConfig.getDataSourceName(), setterMethodName)));
+									getValueFromSqlCode(f, rmofc, 
+											rmSqlProviderConfig, setterMethodName)));
 				}
 				else {
 					return "";
@@ -157,48 +163,13 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 						");", variables, variableNames);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	protected String getValueFromSqlCode(Field f, RowMapperObjectFieldConfig rmofc, 
-			String provideSqlCode, String dataSourceName, String setterMethodName) {
-		Matcher m = PROPERTY_OR_RESULT_SET_PATTERN.matcher(provideSqlCode);
-		StringBuilder variables = new StringBuilder();
-		List<String> variableNames = new ArrayList<String>();
-		StringBuilder parametersCode = new StringBuilder();
-		parametersCode.append("new Object[] {");
-		boolean parameterAdded = false;
-		while (m.find()) {
-			String param = m.group(0);
-			if (param.startsWith(PROPERTY_SIGN)) {
-				String paramName = m.group(1);
-				String formattedParam = ":" + paramName;
-				String getterMethod = "get" + 
-											Character.toUpperCase(paramName.charAt(0)) + paramName.substring(1) + 
-												"()";
-				provideSqlCode = provideSqlCode.replace(param, formattedParam);
-				if (parameterAdded) {
-					parametersCode.append(", ");
-				}
-				parametersCode.append(GENERATED_OBJECT_NAME + "." + getterMethod);
-			}
-			else if (param.startsWith(RESULT_SET_SIGN)) {
-				String paramType = m.group(2);
-				String paramName = m.group(3);
-				String formattedParam = ":" + paramName;
-				String getterMethod = "get" + 
-											Character.toUpperCase(paramType.charAt(0)) + paramType.substring(1) + 
-												"(" + "\"" + paramName + "\"" + ")"; 
-				provideSqlCode = provideSqlCode.replace(param, formattedParam);
-				if (parameterAdded) {
-					parametersCode.append(", ");
-				}
-				parametersCode.append(
-						wrapWithNonPrimitiveTypeIfNeeded(paramType, RESULT_SET_ARGUMENT + "." + getterMethod));
-			}
-			else {
-				logger.debug("Unknown expression for SQL provider: " + param);
-			}
-		}
-		parametersCode.append("}");
-
+			RowMapperSqlProviderConfig rmSqlProviderConfig, String setterMethodName) {
+		String sqlCode = rmSqlProviderConfig != null ? rmSqlProviderConfig.getProvideSql() : null;
+		Class<? extends RowMapperSqlQueryInfoProvider> sqlQueryInfoProviderClass = 
+				rmSqlProviderConfig.getSqlQueryInfoProviderClass();
+		
 		Class<?> fieldCls = f.getType();
 		rowMapper.addAdditionalClass(f.getType());
 
@@ -219,7 +190,7 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 			}
 		}
 		
-		String jdbcTemplateCode = "JdbcUtil.getJdbcTemplate" + "(" + "\"" + dataSourceName + "\"" + ")";
+		String jdbcTemplateCode = "JdbcUtil.getJdbcTemplate" + "(" + "\"" + rmSqlProviderConfig.getDataSourceName() + "\"" + ")";
 		
 		String rowMapperCreationCode = 
 				GeneratedRowMapper.class.getName() + ".provideRowMapper" + 
@@ -228,25 +199,103 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 							jdbcTemplateCode + 
 						")";
 		
-		return 
-				wrapWithLazyLoadingIfNeeded(f, setterMethodName, rmofc.isLazy(), rmofc, 
-					GENERATED_OBJECT_NAME + "." + 
-					setterMethodName + 
-					"(" + 
-						"(" + f.getType().getSimpleName() + ")" +
-						"JdbcUtil.runSql" + 
-						"(" +
-							fieldCls.getName() + ".class" + ", " +
-							jdbcTemplateCode + ", " +
-							"\"" + provideSqlCode + "\"" + ", " +
-							parametersCode.toString() + ", " +
-							rowMapperCreationCode +
-						")" +
-					");", variables, variableNames);
+		if (StringUtils.isEmpty(sqlCode) == false) {
+			Matcher m = PROPERTY_OR_RESULT_SET_PATTERN.matcher(sqlCode);
+			StringBuilder parametersCode = new StringBuilder();
+			parametersCode.append("new Object[] {");
+			boolean parameterAdded = false;
+			while (m.find()) {
+				String param = m.group(0);
+				if (param.startsWith(PROPERTY_SIGN)) {
+					String paramName = m.group(1);
+					String formattedParam = ":" + paramName;
+					String getterMethod = "get" + 
+												Character.toUpperCase(paramName.charAt(0)) + paramName.substring(1) + 
+													"()";
+					sqlCode = sqlCode.replace(param, formattedParam);
+					if (parameterAdded) {
+						parametersCode.append(", ");
+					}
+					parametersCode.append(GENERATED_OBJECT_NAME + "." + getterMethod);
+				}
+				else if (param.startsWith(RESULT_SET_SIGN)) {
+					String paramType = m.group(2);
+					String paramName = m.group(3);
+					String formattedParam = ":" + paramName;
+					String getterMethod = "get" + 
+												Character.toUpperCase(paramType.charAt(0)) + paramType.substring(1) + 
+													"(" + "\"" + paramName + "\"" + ")"; 
+					sqlCode = sqlCode.replace(param, formattedParam);
+					if (parameterAdded) {
+						parametersCode.append(", ");
+					}
+					parametersCode.append(
+							wrapWithNonPrimitiveTypeIfNeeded(paramType, RESULT_SET_ARGUMENT + "." + getterMethod));
+				}
+				else {
+					logger.debug("Unknown expression for SQL provider: " + param);
+				}
+			}
+			parametersCode.append("}");
+	
+			return 
+					wrapWithLazyLoadingIfNeeded(f, setterMethodName, rmofc.isLazy(), rmofc, 
+						GENERATED_OBJECT_NAME + "." + 
+						setterMethodName + 
+						"(" + 
+							"(" + f.getType().getSimpleName() + ")" +
+							"JdbcUtil.runSql" + 
+							"(" +
+								fieldCls.getName() + ".class" + ", " +
+								jdbcTemplateCode + ", " +
+								"\"" + sqlCode + "\"" + ", " +
+								parametersCode.toString() + ", " + 
+								rowMapperCreationCode +
+							")" +
+						");", null, null);
+		}	
+		else if (sqlQueryInfoProviderClass != null && 
+					sqlQueryInfoProviderClass.equals(RowMapperSqlQueryInfoProvider.class) == false) {
+			String sqlQueryInfoProviderCreationCode = 
+				"(" +
+					"(" + sqlQueryInfoProviderClass.getName() + ")" +
+					"(" +
+						RowMapperUtil.generateGetSingleInstanceCode(sqlQueryInfoProviderClass) +
+					")" + 
+				")";
+			
+			return 
+					wrapWithLazyLoadingIfNeeded(f, setterMethodName, rmofc.isLazy(), rmofc, 
+						GENERATED_OBJECT_NAME + "." + 
+						setterMethodName + 
+						"(" + 
+							"(" + f.getType().getSimpleName() + ")" +
+							"JdbcUtil.runSql" + 
+							"(" +
+								fieldCls.getName() + ".class" + ", " +
+								jdbcTemplateCode + ", " +
+								sqlQueryInfoProviderCreationCode + ".provideSqlQueryInfo" + 
+								"(" + 
+									"(" + rowMapper.getClazz().getName() + ")" + RowMapperFieldGenerator.GENERATED_OBJECT_NAME + "," + 
+									"\"" + f.getName() + "\"" +
+								")" + "," +
+								rowMapperCreationCode +
+							")" +
+						");", null, null);
+		}
+		else {
+			return "";
+		}
 	}
 	
 	protected String wrapWithLazyLoadingIfNeeded(Field f, String setterMethodName, boolean isLazy, 
 			RowMapperObjectFieldConfig rmofc, String generatedCode, StringBuilder variables, List<String> variableNames) {
+		if (variables == null) {
+			variables = new StringBuilder();
+		}
+		if (variableNames == null) {
+			variableNames = new ArrayList<String>();
+		}
 		if (isLazy) {
 			int firstIndex = generatedCode.indexOf("(");
 			int lastIndex = generatedCode.lastIndexOf(")");
@@ -470,7 +519,7 @@ public class ObjectFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGene
 			return code;
 		}
 		else {
-			return variables != null ? (variables.toString() + "\n") : "" + generatedCode;
+			return (variables != null ? (variables.toString() + "\n") : "") + generatedCode;
 		}
 	}
 	
