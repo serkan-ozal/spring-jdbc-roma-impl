@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Spring-JDBC-ROMA : Spring-JDBC-ROMA - Byte Code Generation Based ORM Like Row Mapper Framework" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Spring-JDBC-ROMA</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/serkan-ozal/spring-jdbc-roma-impl">View on GitHub</a>
+
+          <h1 id="project_title">Spring-JDBC-ROMA</h1>
+          <h2 id="project_tagline">Spring-JDBC-ROMA - Byte Code Generation Based ORM Like Row Mapper Framework</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/serkan-ozal/spring-jdbc-roma-impl/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/serkan-ozal/spring-jdbc-roma-impl/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="contents" class="anchor" href="#contents"><span class="octicon octicon-link"></span></a>CONTENTS</h1>
+
+<ul>
+<li><a href="#Section_1">1. What is Spring-JDBC-ROMA?</a></li>
+<li><a href="#Section_2">2. Features</a></li>
+<li><a href="#Section_3">3. Installation</a></li>
+<li>
+<a href="#Section_4">4. Usage</a>
+
+<ul>
+<li><a href="#Section_4_1">4.1. Default configurations</a></li>
+<li><a href="#Section_4_2">4.2. Primitive Typed Field Features</a></li>
+<li><a href="#Section_4_3">4.3. Date Typed Field Features</a></li>
+<li><a href="#Section_4_4">4.4. Clob Typed Column Features</a></li>
+<li><a href="#Section_4_5">4.5. Blob Typed Column Features</a></li>
+<li><a href="#Section_4_6">4.6. Enum Typed Field Features</a></li>
+<li><a href="#Section_4_7">4.7. Field Based Features Configuration Features</a></li>
+<li><a href="#Section_4_8">4.8. Class (or Type) Based Configuration Features</a></li>
+<li><a href="#Section_4_9">4.9. RXEL (ROMA Expression Language)</a></li>
+<li><a href="#Section_4_10">4.10. Complex Typed Field Features</a></li>
+<li><a href="#Section_4_11">4.11. Conditional Lazy Feature</a></li>
+<li><a href="#Section_4_12">4.12. Conditional Lazy-Load Feature</a></li>
+<li><a href="#Section_4_13">4.13. Conditional Ignore Feature</a></li>
+<li><a href="#Section_4_14">4.14. Other Features</a></li>
+</ul>
+</li>
+<li><a href="#Section_5">5. A Simple Example</a></li>
+<li><a href="#Section_6">6. Roadmap</a></li>
+</ul><p><a name="Section_1"></a></p>
+
+<h1>
+<a name="1-what-is-spring-jdbc-roma" class="anchor" href="#1-what-is-spring-jdbc-roma"><span class="octicon octicon-link"></span></a>1. What is Spring-JDBC-ROMA?</h1>
+
+<p><strong>Spring-JDBC-ROMA</strong> is a rowmapper extension for <strong>Spring-JDBC module</strong>. 
+There is already a rowmapper named <code>org.springframework.jdbc.core.BeanPropertyRowMapper</code> for binding 
+resultset attributes to object. But it is reflection based and can cause performance problems as Spring developers said.
+However <strong>Spring-JDBC-ROMA</strong> is not reflection based and it is byte code generation (with <strong>CGLib</strong> and <strong>Javassist</strong>) 
+based rowmapper. It generates rowmapper on the fly like implementing as manual so it has no performance overhead. 
+It also supports object relations as lazy and eager. There are other lots of interesting features and 
+these features can be customized with developer's extended classes. </p>
+
+<p><a name="Section_2"></a></p>
+
+<h1>
+<a name="2-features" class="anchor" href="#2-features"><span class="octicon octicon-link"></span></a>2. Features</h1>
+
+<ul>
+<li><p>All primitive types, strings, enums, dates, clob, blob, collections and complex objects are supported.  </p></li>
+<li><p>Writing your custom class (or type) based field generator factory, object creater, object processor, table name resolver, column name resolver implementations and customizable data source, schema, table names are supported.  </p></li>
+<li><p>Writing your custom field based mapper, SQL based binder, expression language based binder and custom binder implementations are supported.   </p></li>
+<li><p>Lazy or eager field accessing is supported. Lazy support can be configured as conditional and conditions can be provided as expression language or as custom lazy condition provider implementations. If lazy condition is not enable, specified field is not handled as lazy and set as eager while creating root entity.</p></li>
+<li><p>Loading lazy fields can be enable or disable at runtime dynamically by using key based, expression based and custom implementation based approaches. If lazy-load condition is not enable, specified lazy field is not loaded no matter field is configured as lazy.</p></li>
+<li><p>Ignoring fields can be enable or disable at runtime dynamically by using key based, expression based and custom implementation based approaches. This feature is very useful in some use-cases. For example, this feature can be used to ignore some fields while serializing to JSON at your specified controller and this behaviour doesn't effect other controllers.</p></li>
+<li><p>Writing field access definitions as REXL (ROMA Expression Language) or as compilable Java code in annotation. XML and properties file configuration support will be added soon.  </p></li>
+</ul><p><a name="Section_3"></a></p>
+
+<h1>
+<a name="3-installation" class="anchor" href="#3-installation"><span class="octicon octicon-link"></span></a>3. Installation</h1>
+
+<p>In your <strong>pom.xml</strong>, you must add repository and dependency for Spring-JDBC-ROMA. 
+You can change <strong>spring.jdbc.roma.version</strong> to any existing <strong>spring-jdbc-roma</strong> library version.</p>
+
+<div class="highlight highlight-xml"><pre>...
+<span class="nt">&lt;properties&gt;</span>
+    ...
+    <span class="nt">&lt;spring.jdbc.roma.version&gt;</span>2.0.0-SNAPSHOT<span class="nt">&lt;/spring.jdbc.roma.version&gt;</span>
+    ...
+<span class="nt">&lt;/properties&gt;</span>
+...
+<span class="nt">&lt;dependencies&gt;</span>
+    ...
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>org.springframework<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>spring-jdbc-roma<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>${spring.jdbc.roma.version}<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    ...
+<span class="nt">&lt;/dependencies&gt;</span>
+...
+<span class="nt">&lt;repositories&gt;</span>
+    ...
+    <span class="nt">&lt;repository&gt;</span>
+        <span class="nt">&lt;id&gt;</span>serkanozal-maven-repository<span class="nt">&lt;/id&gt;</span>
+        <span class="nt">&lt;url&gt;</span>https://github.com/serkan-ozal/maven-repository/raw/master/<span class="nt">&lt;/url&gt;</span>
+    <span class="nt">&lt;/repository&gt;</span>
+    ...
+<span class="nt">&lt;/repositories&gt;</span>
+...
+</pre></div>
+
+<p>And finally, in your <strong>Spring context xml</strong> file add following configuration to make your Spring context automatically aware of Spring-JDBC-ROMA.</p>
+
+<div class="highlight highlight-xml"><pre>...
+<span class="nt">&lt;import</span> <span class="na">resource=</span><span class="s">"classpath*:roma-context.xml"</span><span class="nt">/&gt;</span>
+...
+</pre></div>
+
+<p><a name="Section_4"></a></p>
+
+<h1>
+<a name="4-usage" class="anchor" href="#4-usage"><span class="octicon octicon-link"></span></a>4. Usage</h1>
+
+<p>You must get your row mapper via service class (<code>org.springframework.jdbc.roma.impl.service.RowMapperService</code>) of ROMA.</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@Autowired</span>
+<span class="n">RowMapperService</span> <span class="n">rowMapperService</span><span class="o">;</span>
+
+<span class="o">...</span>
+
+<span class="n">RowMapper</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span> <span class="n">userRowMapper</span> <span class="o">=</span> <span class="n">rowMapperService</span><span class="o">.</span><span class="na">getRowMapper</span><span class="o">(</span><span class="n">User</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</pre></div>
+
+<p><a name="Section_4_1"></a></p>
+
+<h2>
+<a name="41-default-configurations" class="anchor" href="#41-default-configurations"><span class="octicon octicon-link"></span></a>4.1. Default configurations</h2>
+
+<p>Default configurations are stored and accessed by <code>org.springframework.jdbc.roma.api.config.DefaultConfigs</code> class.</p>
+
+<p>Configurable values as default are:</p>
+
+<ul>
+<li><p><strong>Datasource name:</strong> Name of the datasource to connect. Initial value of default datasource name is <code>dataSource</code>. So if you have defined your datasource named as <code>dataSource</code>, you don't need to configure this value.</p></li>
+<li><p><strong>Schema name:</strong> Name of the schema name in DB to connect. Initial value of default datasource name is <code>null</code>. So default schema of DB is used. If default schema of your connected DB is used, you don't need to configure this value.</p></li>
+</ul><p>Using default values are helpful if there are so many entities using same datasource and schema name configurations.
+In addition to default values, you must configure these values based on entity and this will be mentioned in sections below. Note that initial default </p>
+
+<p>Default configurations can be configured programatically or in context xml of Spring like:</p>
+
+<div class="highlight highlight-xml"><pre>...
+<span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"defaultConfigs"</span> <span class="na">class=</span><span class="s">"org.springframework.jdbc.roma.api.config.DefaultConfigs"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"defaultDataSourceName"</span> <span class="na">value=</span><span class="s">"myDataSource"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"defaultSchemaName"</span> <span class="na">value=</span><span class="s">"myDBSchema"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/bean&gt;</span>
+...
+</pre></div>
+
+<p><a name="Section_4_2"></a></p>
+
+<h2>
+<a name="42-primitive-typed-field-features" class="anchor" href="#42-primitive-typed-field-features"><span class="octicon octicon-link"></span></a>4.2. Primitive Typed Field Features</h2>
+
+<ul>
+<li><code>boolean</code></li>
+<li><code>byte</code></li>
+<li><code>char</code></li>
+<li><code>short</code></li>
+<li><code>int</code></li>
+<li><code>float</code></li>
+<li><code>long</code></li>
+<li><code>double</code></li>
+<li><code>java.lang.Boolean</code></li>
+<li><code>java.lang.Byte</code></li>
+<li><code>java.lang.Character</code></li>
+<li><code>java.lang.Short</code></li>
+<li><code>java.lang.Integer</code></li>
+<li><code>java.lang.Float</code></li>
+<li><code>java.lang.Long</code></li>
+<li><code>java.lang.Double</code></li>
+<li>
+<code>java.lang.String</code><br>
+</li>
+</ul><p>typed fields are automatically mapped to result set in row mapper.</p>
+
+<p><a name="Section_4_3"></a></p>
+
+<h2>
+<a name="43-date-typed-field-features" class="anchor" href="#43-date-typed-field-features"><span class="octicon octicon-link"></span></a>4.3. Date Typed Field Features</h2>
+
+<p><code>java.util.Date</code> typed fields are automatically mapped to result set as <strong>Date</strong> in row mapper. But if mapped column in database is defined as <strong>Timestamp</strong> typed, you can configure this field by using <strong><code>@RowMapperTimeField</code></strong> annotation as:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperTimeField</span><span class="o">(</span><span class="n">asTimestamp</span> <span class="o">=</span> <span class="kc">true</span><span class="o">)</span>
+<span class="kd">private</span> <span class="n">Date</span> <span class="n">date</span><span class="o">;</span>
+</pre></div>
+
+<p><a name="Section_4_4"></a></p>
+
+<h2>
+<a name="44-clob-typed-column-features" class="anchor" href="#44-clob-typed-column-features"><span class="octicon octicon-link"></span></a>4.4. Clob Typed Column Features</h2>
+
+<p><code>CLOB</code> typed column can be mapped to <strong><code>java.lang.String</code></strong> typed field by using <strong><code>@RowMapperClobField</code></strong> annotation like this:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperClobField</span>
+<span class="kd">private</span> <span class="n">String</span> <span class="n">address</span><span class="o">;</span>
+</pre></div>
+
+<p><a name="Section_4_5"></a></p>
+
+<h2>
+<a name="45-blob-typed-column-features" class="anchor" href="#45-blob-typed-column-features"><span class="octicon octicon-link"></span></a>4.5. Blob Typed Column Features</h2>
+
+<p><code>BLOB</code> typed column can be mapped to <strong><code>byte[]</code></strong> typed field by using <strong><code>@RowMapperBlobField</code></strong> annotation like this:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperBlobField</span>
+<span class="kd">private</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">image</span><span class="o">;</span>
+</pre></div>
+
+<p><a name="Section_4_6"></a></p>
+
+<h2>
+<a name="46-enum-typed-field-features" class="anchor" href="#46-enum-typed-field-features"><span class="octicon octicon-link"></span></a>4.6. Enum Typed Field Features</h2>
+
+<p>By default, enums are mapped by using numeric column value as ordinal of enum. For example, you have an enum named <code>UserType</code> like this:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">enum</span> <span class="n">UserType</span> <span class="o">{</span>
+
+    <span class="n">ADMIN</span><span class="o">,</span>
+    <span class="n">MEMBER</span><span class="o">,</span>
+    <span class="n">GUEST</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>If numeric value of column is <code>1</code>, value is mapped to enum field as <code>MEMBER</code>.</p>
+
+<p>Enum mappings can be configured by using <strong><code>@RowMapperEnumField</code></strong> annotation.</p>
+
+<ul>
+<li>
+<strong>constantsAndMaps:</strong> This feature is now depracated from version 2.0. With this configuration feature, you can map numeric value of column to String value of enum.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperEnumField</span><span class="o">(</span><span class="n">constantsAndMaps</span> <span class="o">=</span> <span class="o">{</span><span class="s">"1:ADMIN"</span><span class="o">,</span> <span class="s">"2:MEMBER"</span><span class="o">,</span> <span class="s">"3:GUEST"</span><span class="o">})</span>
+<span class="kd">private</span> <span class="n">UserType</span> <span class="n">userType</span><span class="o">;</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>enumStartValue:</strong> With this configuration feature, numeric column value is mapped to enum ordinal by using start value as first element of enum. For example, you have an enum named <code>Language</code> like this:</li>
+</ul><div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">enum</span> <span class="n">Language</span> <span class="o">{</span>
+
+    <span class="n">TURKISH</span><span class="o">,</span>
+    <span class="n">ENGLISH</span><span class="o">,</span>
+    <span class="n">GERMAN</span><span class="o">,</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>and enum field is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperEnumField</span><span class="o">(</span><span class="n">enumStartValue</span> <span class="o">=</span> <span class="mi">1</span><span class="o">)</span>
+<span class="kd">private</span> <span class="n">Language</span> <span class="n">language</span><span class="o">;</span>
+</pre></div>
+
+<p>If numeric value of column is <code>1</code>, value is mapped to enum field as <code>TURKISH</code>. Because <code>enumStartValue</code> is <code>1</code> and actual ordinal will be <code>1 - 1 = 0</code>. So mapped value will be <code>TURKISH</code>.</p>
+
+<ul>
+<li>
+<strong>useStringValue:</strong> By default, column value is mapped to enum value with its numeric value. With this configuration feature, column value is mapped to enum value with its string value by using name of enum value. For example, you have an enum named <code>Religion</code> like this:</li>
+</ul><div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">enum</span> <span class="n">Religion</span> <span class="o">{</span>
+
+    <span class="n">MUSLIM</span><span class="o">,</span>
+    <span class="n">JEWISH</span><span class="o">,</span>
+    <span class="n">CHRISTIAN_CAHTOLICS</span><span class="o">,</span>
+    <span class="n">CHRISTIAN_ORTHODOX</span><span class="o">,</span>
+    <span class="n">CHRISTIAN_PROTESTANT</span><span class="o">,</span>
+    <span class="n">ATHEIST</span><span class="o">,</span>
+    <span class="n">OTHER</span><span class="o">;</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>and enum field is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperEnumField</span><span class="o">(</span><span class="n">useStringValue</span> <span class="o">=</span> <span class="kc">true</span><span class="o">)</span>
+<span class="kd">private</span> <span class="n">Religion</span> <span class="n">religion</span><span class="o">;</span>
+</pre></div>
+
+<p>If string value of column is <code>"MUSLIM"</code>, value is mapped to enum field as <code>MUSLIM</code>. </p>
+
+<ul>
+<li>
+<strong>defaultIndex:</strong> With this configuration feature, if column value is empty (null), this index value will be used as ordinal of enum value for default value of field. For example, you have an enum named <code>UserType</code> like this:</li>
+</ul><div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">enum</span> <span class="n">UserType</span> <span class="o">{</span>
+
+    <span class="n">ADMIN</span><span class="o">,</span>
+    <span class="n">MEMBER</span><span class="o">,</span>
+    <span class="n">GUEST</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>and enum field is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperEnumField</span><span class="o">(</span><span class="n">defaultIndex</span> <span class="o">=</span> <span class="mi">2</span><span class="o">)</span>
+<span class="kd">private</span> <span class="n">UserType</span> <span class="n">userType</span><span class="o">;</span>
+</pre></div>
+
+<p>If column value is empty (null), value is mapped to enum field as <code>GUEST</code>. Because <code>defaultIndex</code> is <code>2</code> and ordinal will used as <code>2</code>. So mapped value will be <code>GUEST</code>.</p>
+
+<ul>
+<li>
+<strong>defaultValue:</strong> With this configuration feature, if column value is empty (null), this index value will be used as name of enum value for default value of field. For example, you have an enum named <code>UserType</code> like this:</li>
+</ul><div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">enum</span> <span class="n">UserType</span> <span class="o">{</span>
+
+    <span class="n">ADMIN</span><span class="o">,</span>
+    <span class="n">MEMBER</span><span class="o">,</span>
+    <span class="n">GUEST</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>and enum field is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperEnumField</span><span class="o">(</span><span class="n">defaultValue</span> <span class="o">=</span> <span class="s">"GUEST"</span><span class="o">)</span>
+<span class="kd">private</span> <span class="n">UserType</span> <span class="n">userType</span><span class="o">;</span>
+</pre></div>
+
+<p>If column value is empty (null), value is mapped to enum field as <code>GUEST</code>. Since <code>defaultValue</code> is <code>"GUEST"</code>, mapped value will be <code>GUEST</code>.</p>
+
+<ul>
+<li>
+<strong>mapViaNumericMapper:</strong> With this configuration feature by using <strong><code>@RowMapperEnumNumericMapper</code></strong> annotation in <strong><code>@RowMapperEnumField</code></strong> annotation, you can use your custom mapper implementations by implementing <strong><code>org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperEnumField.NumericEnumMapper</code></strong> interface for numeric column values. Instance of your implementation is created once and used as singleton. For example, you have an enum named <code>BloodType</code> like this:</li>
+</ul><div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">enum</span> <span class="n">BloodType</span> <span class="o">{</span>
+
+    <span class="n">TYPE_A_RH_POSITIVE</span><span class="o">(</span><span class="mi">1</span><span class="o">),</span>
+    <span class="n">TYPE_A_RH_NEGATIVE</span><span class="o">(</span><span class="mi">2</span><span class="o">),</span>
+    <span class="n">TYPE_B_RH_POSITIVE</span><span class="o">(</span><span class="mi">3</span><span class="o">),</span>
+    <span class="n">TYPE_B_RH_NEGATIVE</span><span class="o">(</span><span class="mi">4</span><span class="o">),</span>
+    <span class="n">TYPE_AB_RH_POSITIVE</span><span class="o">(</span><span class="mi">5</span><span class="o">),</span>
+    <span class="n">TYPE_AB_RH_NEGATIVE</span><span class="o">(</span><span class="mi">6</span><span class="o">),</span>
+    <span class="n">TYPE_0_RH_POSITIVE</span><span class="o">(</span><span class="mi">7</span><span class="o">),</span>
+    <span class="n">TYPE_0_RH_NEGATIVE</span><span class="o">(</span><span class="mi">8</span><span class="o">);</span>
+
+    <span class="kt">int</span> <span class="n">code</span><span class="o">;</span>
+
+    <span class="n">BloodType</span><span class="o">(</span><span class="kt">int</span> <span class="n">code</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getCode</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">code</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>your custom numeric mapper implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">BloodTypeEnumMapper</span> <span class="kd">implements</span> <span class="n">RowMapperEnumField</span><span class="o">.</span><span class="na">NumericEnumMapper</span><span class="o">&lt;</span><span class="n">BloodType</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">BloodType</span> <span class="nf">map</span><span class="o">(</span><span class="n">Integer</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="n">BloodType</span> <span class="n">bt</span> <span class="o">:</span> <span class="n">BloodType</span><span class="o">.</span><span class="na">values</span><span class="o">())</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">bt</span><span class="o">.</span><span class="na">getCode</span><span class="o">()</span> <span class="o">==</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="n">bt</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>and enum field is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperEnumField</span><span class="o">(</span>
+    <span class="n">mapViaNumericMapper</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperEnumNumericMapper</span><span class="o">(</span>
+            <span class="n">mapper</span> <span class="o">=</span> <span class="n">BloodTypeEnumMapper</span><span class="o">.</span><span class="na">class</span><span class="o">))</span>
+<span class="kd">private</span> <span class="n">BloodType</span> <span class="n">bloodType</span><span class="o">;</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>mapViaStringMapper:</strong> With this configuration feature by using <strong><code>@RowMapperEnumStringMapper</code></strong> annotation in <strong><code>@RowMapperEnumField</code></strong> annotation, you can use your custom mapper implementations by implementing <strong><code>org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperEnumField.StringEnumMapper</code></strong> interface for numeric column values. Instance of your implementation is created once and used as singleton. For example, you have an enum named <code>MaritalStatus</code> like this:</li>
+</ul><div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">enum</span> <span class="n">MaritalStatus</span> <span class="o">{</span>
+
+    <span class="n">SINGLE</span><span class="o">,</span>
+    <span class="n">ENGAGED</span><span class="o">,</span>
+    <span class="n">MARRIED</span><span class="o">,</span>
+    <span class="n">DIVORCED</span><span class="o">;</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>your custom numeric mapper implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MaritalStatusEnumMapper</span> <span class="kd">implements</span> <span class="n">RowMapperEnumField</span><span class="o">.</span><span class="na">StringEnumMapper</span><span class="o">&lt;</span><span class="n">MaritalStatus</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">MaritalStatus</span> <span class="nf">map</span><span class="o">(</span><span class="n">String</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="n">MaritalStatus</span> <span class="n">ms</span> <span class="o">:</span> <span class="n">MaritalStatus</span><span class="o">.</span><span class="na">values</span><span class="o">())</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">ms</span><span class="o">.</span><span class="na">name</span><span class="o">().</span><span class="na">equalsIgnoreCase</span><span class="o">(</span><span class="n">value</span><span class="o">))</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="n">ms</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>and enum field is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperEnumField</span><span class="o">(</span>
+    <span class="n">mapViaStringMapper</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperEnumStringMapper</span><span class="o">(</span>
+            <span class="n">mapper</span> <span class="o">=</span> <span class="n">MaritalStatusEnumMapper</span><span class="o">.</span><span class="na">class</span><span class="o">))</span>
+<span class="kd">private</span> <span class="n">MaritalStatus</span> <span class="n">maritalStatus</span><span class="o">;</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>mapViaNumericValueNumericMappings:</strong> With this configuration feature by using <strong><code>@RowMapperEnumAutoMapper</code></strong> annotation in <strong><code>@RowMapperEnumField</code></strong> annotation, you can map numeric column values with ordinals of enum. For example, you have an enum named <code>Occupation</code> like this:</li>
+</ul><div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">enum</span> <span class="n">Occupation</span> <span class="o">{</span>
+
+    <span class="n">OTHER</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span>
+    <span class="n">ARCHITECT</span><span class="o">(</span><span class="mi">100</span><span class="o">),</span>
+    <span class="n">DOCTOR</span><span class="o">(</span><span class="mi">200</span><span class="o">),</span>
+    <span class="n">ENGINEER</span><span class="o">(</span><span class="mi">300</span><span class="o">),</span>
+    <span class="n">LAWYER</span><span class="o">(</span><span class="mi">400</span><span class="o">),</span>
+    <span class="n">MUSICIAN</span><span class="o">(</span><span class="mi">500</span><span class="o">),</span>
+    <span class="n">STUDENT</span><span class="o">(</span><span class="mi">600</span><span class="o">),</span>
+    <span class="n">TEACHER</span><span class="o">(</span><span class="mi">700</span><span class="o">);</span>
+
+    <span class="kt">int</span> <span class="n">code</span><span class="o">;</span>
+
+    <span class="n">Occupation</span><span class="o">(</span><span class="kt">int</span> <span class="n">code</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getCode</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">code</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>and enum field is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperEnumField</span><span class="o">(</span>
+    <span class="n">mapViaAutoMapper</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperEnumAutoMapper</span><span class="o">(</span>
+            <span class="n">mapViaNumericValueNumericMappings</span> <span class="o">=</span> <span class="o">{</span>
+                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">1</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">100</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">2</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">200</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">3</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">300</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">4</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">400</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">5</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">500</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">6</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">600</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">7</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">700</span><span class="o">)}))</span>
+<span class="kd">private</span> <span class="n">Occupation</span> <span class="n">occupation</span><span class="o">;</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>mapViaNumericValueStringMappings:</strong> With this configuration feature by using <strong><code>@RowMapperEnumAutoMapper</code></strong> annotation in <strong><code>@RowMapperEnumField</code></strong> annotation, you can map numeric column values with names of enum. For example, you have an enum named <code>Occupation</code> like this:</li>
+</ul><div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">enum</span> <span class="n">Occupation</span> <span class="o">{</span>
+
+    <span class="n">OTHER</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span>
+    <span class="n">ARCHITECT</span><span class="o">(</span><span class="mi">100</span><span class="o">),</span>
+    <span class="n">DOCTOR</span><span class="o">(</span><span class="mi">200</span><span class="o">),</span>
+    <span class="n">ENGINEER</span><span class="o">(</span><span class="mi">300</span><span class="o">),</span>
+    <span class="n">LAWYER</span><span class="o">(</span><span class="mi">400</span><span class="o">),</span>
+    <span class="n">MUSICIAN</span><span class="o">(</span><span class="mi">500</span><span class="o">),</span>
+    <span class="n">STUDENT</span><span class="o">(</span><span class="mi">600</span><span class="o">),</span>
+    <span class="n">TEACHER</span><span class="o">(</span><span class="mi">700</span><span class="o">);</span>
+
+    <span class="kt">int</span> <span class="n">code</span><span class="o">;</span>
+
+    <span class="n">Occupation</span><span class="o">(</span><span class="kt">int</span> <span class="n">code</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getCode</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">code</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>and enum field is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperEnumField</span><span class="o">(</span>
+    <span class="n">mapViaAutoMapper</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperEnumAutoMapper</span><span class="o">(</span>
+            <span class="n">mapViaNumericValueStringMappings</span> <span class="o">=</span> <span class="o">{</span>
+                <span class="nd">@RowMapperEnumNumericValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"OTHER"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"ARCHITECT"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">100</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"DOCTOR"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">200</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"ENGINEER"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">300</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"LAWYER"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">400</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"MUSICIAN"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">500</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"STUDENT"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">600</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumNumericValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"TEACHER"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">700</span><span class="o">)}))</span>
+<span class="kd">private</span> <span class="n">Occupation</span> <span class="n">occupation</span><span class="o">;</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>mapViaStringValueNumericMappings:</strong> With this configuration feature by using <strong><code>@RowMapperEnumAutoMapper</code></strong> annotation in <strong><code>@RowMapperEnumField</code></strong> annotation, you can map string column values with ordinals of enum. For example, you have an enum named <code>Education</code> like this:</li>
+</ul><div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">enum</span> <span class="n">Education</span> <span class="o">{</span>
+
+    <span class="n">PRIMARY_SCHOOL</span><span class="o">,</span>
+    <span class="n">SECONDARY_SCHOOL</span><span class="o">,</span>
+    <span class="n">HIGH_SCHOOL</span><span class="o">,</span>
+    <span class="n">BACHELOR</span><span class="o">,</span>
+    <span class="n">MASTER</span><span class="o">,</span>
+    <span class="n">PHD</span><span class="o">,</span>
+    <span class="n">ASSOCIATE_PROFESSOR</span><span class="o">,</span>
+    <span class="n">PROFESSOR</span><span class="o">,</span>
+    <span class="n">OTHER</span><span class="o">;</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>and enum field is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperEnumField</span><span class="o">(</span>
+    <span class="n">mapViaAutoMapper</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperEnumAutoMapper</span><span class="o">(</span>
+            <span class="n">mapViaStringValueNumericMappings</span> <span class="o">=</span> <span class="o">{</span>
+                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"PRIMARY_SCHOOL"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">1</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"SECONDARY_SCHOOL"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">2</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"HIGH_SCHOOL"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">3</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"BACHELOR"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">4</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"MASTER"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">5</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"PHD"</span> <span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">6</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"ASSOCIATE_PROFESSOR"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">7</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"PROFESSOR"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">8</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"OTHER"</span><span class="o">)}))</span>
+<span class="kd">private</span> <span class="n">Education</span> <span class="n">education</span><span class="o">;</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>mapViaStringValueStringMappings:</strong> With this configuration feature by using <strong><code>@RowMapperEnumAutoMapper</code></strong> annotation in <strong><code>@RowMapperEnumField</code></strong> annotation, you can map string column values with names of enum. For example, you have an enum named <code>Education</code> like this:</li>
+</ul><div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">enum</span> <span class="n">Education</span> <span class="o">{</span>
+
+    <span class="n">PRIMARY_SCHOOL</span><span class="o">,</span>
+    <span class="n">SECONDARY_SCHOOL</span><span class="o">,</span>
+    <span class="n">HIGH_SCHOOL</span><span class="o">,</span>
+    <span class="n">BACHELOR</span><span class="o">,</span>
+    <span class="n">MASTER</span><span class="o">,</span>
+    <span class="n">PHD</span><span class="o">,</span>
+    <span class="n">ASSOCIATE_PROFESSOR</span><span class="o">,</span>
+    <span class="n">PROFESSOR</span><span class="o">,</span>
+    <span class="n">OTHER</span><span class="o">;</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>and enum field is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperEnumField</span><span class="o">(</span>
+    <span class="n">mapViaAutoMapper</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperEnumAutoMapper</span><span class="o">(</span>
+            <span class="n">mapViaStringValueStringMappings</span> <span class="o">=</span> <span class="o">{</span>
+                <span class="nd">@RowMapperEnumStringValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"PRIMARY_SCHOOL"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"PRIMARY_SCHOOL"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"SECONDARY_SCHOOL"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"SECONDARY_SCHOOL"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"HIGH_SCHOOL"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"HIGH_SCHOOL"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"BACHELOR"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"BACHELOR"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"MASTER"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"MASTER"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"PHD"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"PHD"</span> <span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"ASSOCIATE_PROFESSOR"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"ASSOCIATE_PROFESSOR"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"PROFESSOR"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"PROFESSOR"</span><span class="o">),</span>
+                <span class="nd">@RowMapperEnumStringValueStringMapping</span><span class="o">(</span><span class="n">mappingValue</span> <span class="o">=</span> <span class="s">"OTHER"</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"OTHER"</span><span class="o">)}))</span>
+<span class="kd">private</span> <span class="n">Education</span> <span class="n">education</span><span class="o">;</span>
+</pre></div>
+
+<p><a name="Section_4_7"></a></p>
+
+<h2>
+<a name="47-field-based-features-configuration-features" class="anchor" href="#47-field-based-features-configuration-features"><span class="octicon octicon-link"></span></a>4.7. Field Based Features Configuration Features</h2>
+
+<p>General field configurations can be done by using <strong><code>@RowMappeField</code></strong> annotation.</p>
+
+<p>By default, you don't need to specify column name for field if you use similar names for field and column in database. For similarity between field name and column name, default column name resolver generates some possible column names by using field name and check them by connecting to related table at database. Generated possible column names are in</p>
+
+<ol>
+<li>columnName</li>
+<li>columname</li>
+<li>COLUMNNAME</li>
+<li>column_Name</li>
+<li>colum_name</li>
+<li>COLUMN_NAME</li>
+</ol><p>formats.</p>
+
+<p>For example, if you have a field named <code>birthDate</code>, generated possible column names will be</p>
+
+<ol>
+<li>birthDate</li>
+<li>birthdate</li>
+<li>BIRTHDATE</li>
+<li>birth_Date</li>
+<li>birth_date</li>
+<li><p>BIRTH_DATE</p></li>
+</ol><ul>
+<li>
+<strong>columnName:</strong> With this configuration feature, you can specify column name of field to be mapped.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMappeField</span><span class="o">(</span><span class="n">columnName</span> <span class="o">=</span> <span class="s">"username"</span><span class="o">)</span>
+<span class="kd">private</span> <span class="n">String</span> <span class="n">username</span><span class="o">;</span>
+</pre></div>
+
+<ul>
+<li><p><strong>fieldGenerator:</strong> With this configuration feature, you can use your custom field generator implementations by implementing <strong><code>org.springframework.jdbc.roma.api.generator.RowMapperFieldGenerator</code></strong> interface for generating mapping statement. Instance of your implementation is created once and used as singleton. In you implementation, you can</p></li>
+</ul><ol>
+<li>refer to created entity by using <strong><code>RowMapperFieldGenerator.GENERATED_OBJECT_NAME</code></strong> property,</li>
+<li>refer to resultset by using <strong><code>RowMapperFieldGenerator.RESULT_SET_ARGUMENT</code></strong> property,</li>
+<li>refer to row number by using <strong><code>RowMapperFieldGenerator.ROW_NUM_ARGUMENT</code></strong> property.</li>
+</ol><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMappeField</span><span class="o">(</span><span class="n">fieldGenerator</span> <span class="o">=</span> <span class="n">UsernameFieldGenerator</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">private</span> <span class="n">String</span> <span class="n">username</span><span class="o">;</span>
+</pre></div>
+
+<p>and your custom field generator implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UsernameFieldGenerator</span> <span class="kd">implements</span> <span class="n">RowMapperFieldGenerator</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">generateFieldMapping</span><span class="o">(</span><span class="n">Field</span> <span class="n">f</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> 
+            <span class="n">RowMapperFieldGenerator</span><span class="o">.</span><span class="na">GENERATED_OBJECT_NAME</span> <span class="o">+</span> 
+                <span class="s">".setUsername"</span> <span class="o">+</span> 
+                <span class="s">"("</span> <span class="o">+</span> 
+                    <span class="n">RowMapperFieldGenerator</span><span class="o">.</span><span class="na">RESULT_SET_ARGUMENT</span> <span class="o">+</span> <span class="s">".getString(\"username\")"</span> <span class="o">+</span>  
+                <span class="s">");"</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>fieldMapper:</strong> With this configuration feature, you can use your custom field mapper implementations by implementing <strong><code>org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperField.RowMapperFieldMapper</code></strong> interface for mapping specified field from resultset. Instance of your implementation is created once and used as singleton.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperField</span><span class="o">(</span><span class="n">fieldMapper</span> <span class="o">=</span> <span class="n">RoleNameFieldMapper</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">private</span> <span class="n">String</span> <span class="n">name</span><span class="o">;</span>
+</pre></div>
+
+<p>and your custom field mapper implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RoleNameFieldMapper</span> <span class="kd">implements</span> <span class="n">RowMapperFieldMapper</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">RoleNameFieldMapper</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">mapField</span><span class="o">(</span><span class="n">Role</span> <span class="n">role</span><span class="o">,</span> <span class="n">String</span> <span class="n">fieldName</span><span class="o">,</span> <span class="n">ResultSet</span> <span class="n">rs</span><span class="o">,</span> <span class="kt">int</span> <span class="n">rowNum</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">role</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s">"name"</span><span class="o">));</span>
+        <span class="o">}</span> 
+        <span class="k">catch</span> <span class="o">(</span><span class="n">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"Error occured while mapping field "</span> <span class="o">+</span> <span class="n">fieldName</span> <span class="o">+</span> 
+                    <span class="s">" in Role object from resultset"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p><a name="Section_4_8"></a></p>
+
+<h2>
+<a name="48-class-or-type-based-configuration-features" class="anchor" href="#48-class-or-type-based-configuration-features"><span class="octicon octicon-link"></span></a>4.8. Class (or Type) Based Configuration Features</h2>
+
+<p>General class (or type) configurations can be done by using <strong><code>@RowMappeClass</code></strong> annotation.</p>
+
+<ul>
+<li>
+<strong>dataSourceName:</strong> With this configuration feature, you can specify name of the datasource to connect for this class (or type). Initial value of default datasource name is <code>dataSource</code>. So if you have defined your datasource named as <code>dataSource</code>, you don't need to configure this value.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperClass</span><span class="o">(</span><span class="n">dataSourceName</span> <span class="o">=</span> <span class="s">"myDataSource"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">User</span> <span class="o">{</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>schemaName:</strong> With this configuration feature, you can specify name of the schema in database to connect for this class (or type). Initial value of default datasource name is <code>null</code>. So default schema of DB is used. If default schema of your connected DB is used, you don't need to configure this value.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperClass</span><span class="o">(</span><span class="n">schemaName</span> <span class="o">=</span> <span class="s">"Production"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">User</span> <span class="o">{</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+
+<ul>
+<li><p><strong>tableName:</strong> With this configuration feature, you can specify name of the table to map this class (or type). By default, you don't need to specify table name for class if you use similar names for class and table in database. For similarity between class name and table name, default table name resolver generates some possible table names by using class name and check them by connecting to related table at database. Generated possible table names are in</p></li>
+</ul><ol>
+<li>TableName</li>
+<li>tablename</li>
+<li>TABLENAME</li>
+<li>Table_Name</li>
+<li>table_name</li>
+<li>TABLE_NAME</li>
+</ol><p>formats.</p>
+
+<p>For example, if you have a class named <code>SystemLog</code>, generated possible table names will be</p>
+
+<ol>
+<li>SystemLog</li>
+<li>systemlog</li>
+<li>SYSTEMLOG</li>
+<li>System_Log</li>
+<li>system_log</li>
+<li>SYSTEM_LOG</li>
+</ol><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperClass</span><span class="o">(</span><span class="n">tableName</span> <span class="o">=</span> <span class="s">"USERS"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">User</span> <span class="o">{</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>fieldGeneratorFactory:</strong> With this configuration feature, you can use your custom field generator factory implementations by implementing <strong><code>org.springframework.jdbc.roma.api.factory.RowMapperGeneratorFactory</code></strong> interface for creating field generators. Instance of your implementation is created once and used as singleton. For example you have a class named <code>User</code> and you will use your custom field generator factory class.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperClass</span><span class="o">(</span><span class="n">fieldGeneratorFactory</span> <span class="o">=</span> <span class="n">UserFieldGeneratorFactory</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">User</span> <span class="o">{</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>and your custom field generator factory implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserFieldGeneratorFactory</span> <span class="kd">implements</span> <span class="n">RowMapperFieldGeneratorFactory</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">RowMapperFieldGenerator</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span> <span class="nf">createRowMapperFieldGenerator</span><span class="o">(</span><span class="n">Field</span> <span class="n">f</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">f</span><span class="o">.</span><span class="na">getType</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="kt">int</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">||</span> <span class="n">f</span><span class="o">.</span><span class="na">getType</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">Integer</span><span class="o">.</span><span class="na">class</span><span class="o">))</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="nf">MyIntegerFieldGenerator</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="o">...</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>objectCreater:</strong> With this configuration feature, you can use your custom object creater implementations by implementing <strong><code>org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperClass.RowMapperObjectCreater</code></strong> interface for creating entities. Instance of your implementation is created once and used as singleton. For example you have a class named <code>Role</code> and you will use your custom object creater class.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperClass</span><span class="o">(</span><span class="n">objectCreater</span> <span class="o">=</span> <span class="n">RoleObjectCreater</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Role</span> <span class="o">{</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>and your custom object creater implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RoleObjectCreater</span> <span class="kd">implements</span> <span class="n">RowMapperObjectCreater</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Role</span> <span class="nf">createObject</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="n">clazz</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">Role</span><span class="o">();</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>objectProcessor:</strong> With this configuration feature, you can use your custom object processor implementations by implementing <strong><code>org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperClass.RowMapperObjectProcessor</code></strong> interface for creating entities. Instance of your implementation is created once and used as singleton. Object processor class is called after all fields have been mapped from result set before object is returned from rowmapper. For example you have a class named <code>User</code> and you will use your custom object processor class. By your custom object processor class, you will set <code>age</code> field that is not present in database table of <code>User</code> object since it can be calculated by using <code>birthDate</code> field.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperClass</span><span class="o">(</span><span class="n">objectProcessor</span> <span class="o">=</span> <span class="n">UserObjectProcessor</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">User</span> <span class="o">{</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>and your custom object processor implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserObjectProcessor</span> <span class="kd">implements</span> <span class="n">RowMapperObjectProcessor</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">"deprecation"</span><span class="o">)</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">processObject</span><span class="o">(</span><span class="n">User</span> <span class="n">user</span><span class="o">,</span> <span class="n">ResultSet</span> <span class="n">rs</span><span class="o">,</span> <span class="kt">int</span> <span class="n">rowNum</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getBirthDate</span><span class="o">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">user</span><span class="o">.</span><span class="na">setAge</span><span class="o">((</span><span class="kt">byte</span><span class="o">)(</span><span class="n">Calendar</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">getTime</span><span class="o">().</span><span class="na">getYear</span><span class="o">()</span> <span class="o">-</span> <span class="n">user</span><span class="o">.</span><span class="na">getBirthDate</span><span class="o">().</span><span class="na">getYear</span><span class="o">()));</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>columnNameResolver:</strong> With this configuration feature, you can use your custom column name resolver implementations by implementing <strong><code>org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperClass.RowMapperColumnNameResolver</code></strong> interface for resolving column name of fields. Instance of your implementation is created once and used as singleton. For example you have a class named <code>User</code> and you will use your custom field generator factory class.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperClass</span><span class="o">(</span><span class="n">columnNameResolver</span> <span class="o">=</span> <span class="n">UserColumnNameResolver</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">User</span> <span class="o">{</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>and your custom column name resolver implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserColumnNameResolver</span> <span class="kd">implements</span> <span class="n">RowMapperColumnNameResolver</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">resolveColumnName</span><span class="o">(</span><span class="n">Field</span> <span class="n">f</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="na">getName</span><span class="o">().</span><span class="na">toLowerCase</span><span class="o">();</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>tableNameResolver:</strong> With this configuration feature, you can use your custom table name resolver implementations by implementing <strong><code>org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperClass.RowMapperTableNameResolver</code></strong> interface for resolving table name of classes. Instance of your implementation is created once and used as singleton. For example you have a class named <code>User</code> and you will use your custom field generator factory class.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperClass</span><span class="o">(</span><span class="n">tableNameResolver</span> <span class="o">=</span> <span class="n">UserTableNameResolver</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">User</span> <span class="o">{</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>and your custom table name resolver implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserTableNameResolver</span> <span class="kd">implements</span> <span class="n">RowMapperTableNameResolver</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">resolveTableName</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">clazz</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">clazz</span><span class="o">.</span><span class="na">getSimpleName</span><span class="o">().</span><span class="na">toUpperCase</span><span class="o">();</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p><a name="Section_4_9"></a></p>
+
+<h2>
+<a name="49-rxel-roma-expression-language" class="anchor" href="#49-rxel-roma-expression-language"><span class="octicon octicon-link"></span></a>4.9. RXEL (ROMA Expression Language)</h2>
+
+<p>ROMA has a specific expression language named <strong>ROMA Expression Language (REXL)</strong> for customizing some implementations in short like any other expression languages such as Spring expression language.</p>
+
+<h2>
+<a name="491-using-beans-in-expressions" class="anchor" href="#491-using-beans-in-expressions"><span class="octicon octicon-link"></span></a>4.9.1. Using beans in expressions</h2>
+
+<p>With <strong><code>@</code></strong> sign you can use Spring beans in your expression language.</p>
+
+<p>For example:
+<code>@{userDao}.list()</code> expression is executed as calling <code>list</code> method in Spring bean with id <code>userDao</code>.</p>
+
+<h2>
+<a name="492-using-properties-in-expressions" class="anchor" href="#492-using-properties-in-expressions"><span class="octicon octicon-link"></span></a>4.9.2. Using properties in expressions</h2>
+
+<p>With <strong><code>$</code></strong> sign you can use properties of created entity in your expression language.</p>
+
+<p>For example:
+<code>@{roleDao}.list(${id})</code> expression is executed as calling <code>list</code> method in Spring bean with id <code>roleDao</code> by passing <code>id</code> property of created entity as argument.</p>
+
+<h2>
+<a name="493-using-attributes-in-expressions" class="anchor" href="#493-using-attributes-in-expressions"><span class="octicon octicon-link"></span></a>4.9.3. Using attributes in expressions</h2>
+
+<p>With <strong><code>#</code></strong> sign you can get any attribute of any object in your expression language. </p>
+
+<p>For example:
+<code>@{userDao}.getAdmin().#{name}</code> expression is executed as calling <code>getAdmin</code> method in Spring bean with id <code>userDao</code> and return <code>name</code> attribute of returning object (possibly User entity) from <code>getAdmin</code> call.</p>
+
+<h2>
+<a name="494-using-result-set-in-expressions" class="anchor" href="#494-using-result-set-in-expressions"><span class="octicon octicon-link"></span></a>4.9.4. Using result set in expressions</h2>
+
+<p>With <strong><code>&amp;</code></strong> sign you can use result set attributes in your expression language. But in your expression, you must indicate type of the requested attribute between <strong><code>[</code></strong> and <strong><code>]</code></strong> signs.</p>
+
+<p>For example:
+<code>&amp;{[int]enable} == 0 ? "false" : "true"</code> expression is executed as calling <code>getInt("enable")</code> method in result set and checks its value to return <code>true</code> or <code>false</code>.</p>
+
+<p><a name="Section_4_10"></a></p>
+
+<h2>
+<a name="410-complex-typed-field-features" class="anchor" href="#410-complex-typed-field-features"><span class="octicon octicon-link"></span></a>4.10. Complex Typed Field Features</h2>
+
+<ul>
+<li>
+<strong>provideViaExpressionProvider:</strong> With this configuration feature, you can use RXEL (ROMA Expression Language) expression language for providing field value.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+    <span class="n">provideViaExpressionProvider</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperExpressionProvider</span><span class="o">(</span><span class="n">expression</span> <span class="o">=</span> <span class="s">"@{roleDAO}.getUserRoleList(${id})"</span><span class="o">))</span>
+<span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="n">roles</span><span class="o">;</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>provideViaSqlProvider:</strong> With this configuration feature, you can specify SQL query will be executed to provide value of field by using limited supported version of RXEL. Only property (<strong><code>${...}</code></strong>) and resultset (<strong><code>&amp;{[...]...}</code></strong>) based expressions are supported in specified SQL query. If your field is collection typed (Only List type is supported for SQL provide feature), you must specify element type by using <strong><code>entityType</code></strong> property. In addition, you can specify name of datasource where SQL query will be executed by using <strong><code>dataSourceName</code></strong> property.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="n">RowMapperObjectField</span><span class="o">(</span>
+    <span class="n">provideViaSqlProvider</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperSqlProvider</span><span class="o">(</span>
+                    <span class="n">provideSql</span> <span class="o">=</span> 
+                        <span class="s">"SELECT p.* FROM PERMISSION p WHERE p.ID IN "</span> <span class="o">+</span>
+                        <span class="s">"("</span> <span class="o">+</span>
+                            <span class="s">"SELECT rp.PERMISSION_ID FROM role_permission rp WHERE rp.ROLE_ID = ${id}"</span> <span class="o">+</span>
+                        <span class="s">") ORDER BY p.name"</span><span class="o">,</span>
+                    <span class="n">entityType</span> <span class="o">=</span> <span class="n">Permission</span><span class="o">.</span><span class="na">class</span><span class="o">),</span>     
+            <span class="o">...)</span>
+<span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Permission</span><span class="o">&gt;</span> <span class="n">permissions</span><span class="o">;</span>
+</pre></div>
+
+<p>Also, there are a way to customizing SQL query with its parameters by using your custom SQL query info provider implementations by implementing <strong><code>org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperSqlProvider.RowMapperSqlQueryInfoProvider</code></strong> interface for providing SQL query info. Instance of your implementation is created once and used as singleton. Your custom SQL query info provider class returns a <strong><code>org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperSqlProvider.SqlQueryInfo</code></strong> typed object and this objects contains SQL query to execute and its parameters as <strong><code>Object[]</code></strong> array. Note that <strong>RXEL</strong> is <strong>not supported</strong> in SQL query for this feature and you must use <strong><code>?</code></strong> as placeholder for parameter in query.</p>
+
+<p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+    <span class="n">provideViaSqlProvider</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperSqlProvider</span><span class="o">(</span>
+            <span class="n">sqlQueryInfoProvider</span> <span class="o">=</span> <span class="n">UserAccountInfoSqlQueryInfoProvider</span><span class="o">.</span><span class="na">class</span><span class="o">))</span>
+<span class="kd">private</span> <span class="n">AccountInfo</span> <span class="n">accountInfo</span><span class="o">;</span>
+</pre></div>
+
+<p>and your custom SQL query info provider implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserAccountInfoSqlQueryInfoProvider</span> <span class="kd">implements</span> <span class="n">RowMapperSqlQueryInfoProvider</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">SqlQueryInfo</span> <span class="nf">provideSqlQueryInfo</span><span class="o">(</span><span class="n">User</span> <span class="n">user</span><span class="o">,</span> <span class="n">String</span> <span class="n">fieldName</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> 
+            <span class="k">new</span> <span class="nf">SqlQueryInfo</span><span class="o">(</span>
+                <span class="s">"SELECT a.* FROM ACCOUNT_INFO a WHERE a.ID IN "</span> <span class="o">+</span>
+                <span class="s">"("</span> <span class="o">+</span>
+                    <span class="s">"SELECT ua.account_info_id FROM USER_ACCOUNT_INFO ua WHERE ua.user_id = ?"</span> <span class="o">+</span>
+                <span class="s">")"</span><span class="o">,</span>
+                <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span> <span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">});</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>provideViaCustomProvider:</strong> With this configuration feature, you can use your custom field value provider implementations by implementing <strong><code>org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperCustomProvider.RowMapperFieldProvider</code></strong> interface for providing value of field. Instance of your implementation is created once and used as singleton. </li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+    <span class="n">provideViaCustomProvider</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperCustomProvider</span><span class="o">(</span>
+            <span class="n">fieldProvider</span> <span class="o">=</span> <span class="n">UserPhoneNumberFieldProvider</span><span class="o">.</span><span class="na">class</span><span class="o">))</span>
+<span class="kd">private</span> <span class="n">String</span> <span class="n">phoneNumber</span><span class="o">;</span>
+</pre></div>
+
+<p>and your custom field provider implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserPhoneNumberFieldProvider</span> <span class="kd">implements</span> <span class="n">RowMapperFieldProvider</span><span class="o">&lt;</span><span class="n">User</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kd">static</span> <span class="n">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">UserPhoneNumberFieldProvider</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">provideField</span><span class="o">(</span><span class="n">User</span> <span class="n">user</span><span class="o">,</span> <span class="n">String</span> <span class="n">fieldName</span><span class="o">,</span> <span class="n">ResultSet</span> <span class="n">rs</span><span class="o">,</span> <span class="kt">int</span> <span class="n">rowNum</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">rs</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s">"phone_number"</span><span class="o">);</span>
+        <span class="o">}</span> 
+        <span class="k">catch</span> <span class="o">(</span><span class="n">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"Error occured while mapping field "</span> <span class="o">+</span> <span class="n">fieldName</span> <span class="o">+</span> <span class="s">" in User object from resultset"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<ul>
+<li><p><strong>lazy:</strong> With this configuration feature, you can configure this field as lazy permanently if <strong><code>lazyCondition</code></strong> is not specified. Note that specified field type must not <strong><code>final</code></strong> class.</p></li>
+<li><p><strong>lazyCondition:</strong> With this configuration feature, you can configure conditional lazy feature mentioned at section <strong><code>4.11. Conditional Lazy Feature</code></strong>.</p></li>
+<li><p><strong>lazyLoadCondition:</strong> With this configuration feature, you can configure conditional lazy-load feature mentioned at section <strong><code>4.12. Conditional Lazy-Load Feature</code></strong>.</p></li>
+<li><p><strong>ignoreCondition:</strong> With this configuration feature, you can configure conditional ignore feature mentioned at section <strong><code>4.13. Conditional Ignore Feature</code></strong>.</p></li>
+</ul><p><a name="Section_4_11"></a></p>
+
+<h2>
+<a name="411-conditional-lazy-feature" class="anchor" href="#411-conditional-lazy-feature"><span class="octicon octicon-link"></span></a>4.11. Conditional Lazy Feature</h2>
+
+<p>Conditional lazy feature can be configured by using <strong><code>@RowMapperLazyCondition</code></strong> annotation in <strong><code>@RowMapperObjectField</code></strong> annotation with <strong><code>lazyCondition</code></strong> attribute. With conditional lazy feature, you can control lazy feature of any field as dynamic at runtime. </p>
+
+<ul>
+<li>
+<strong>provideViaPropertyBasedProvider:</strong> With this configuration feature, you can attach a specific property to a lazy condition and enable/disable condition of this property is used to evaluate condition.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+    <span class="o">...</span>
+    <span class="n">lazyCondition</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperLazyCondition</span><span class="o">(</span>
+            <span class="n">provideViaPropertyBasedProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperPropertyBasedLazyConditionProvider</span><span class="o">(</span>
+                    <span class="n">propertyName</span> <span class="o">=</span> <span class="s">"creditCardInfoLazyCondition"</span><span class="o">)))</span>
+<span class="kd">private</span> <span class="n">CreditCardInfo</span> <span class="n">creditCardInfo</span><span class="o">;</span>
+</pre></div>
+
+<p>To enable/disable lazy condition property, there are two ways:</p>
+
+<ol>
+<li>You can enable/disable lazy condition property by using <strong><code>enableLazyConditionProperty</code></strong> and <strong><code>disableLazyConditionProperty</code></strong> methods of <strong><code>org.springframework.jdbc.roma.impl.service.RowMapperService</code></strong> service class.</li>
+</ol><p>For example you can get row mapper service class as:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@Autowired</span>
+<span class="kd">private</span> <span class="n">RowMapperService</span><span class="o">;</span>
+</pre></div>
+
+<p>and you can enable lazy condition property as:</p>
+
+<div class="highlight highlight-java"><pre><span class="n">rowMapperService</span><span class="o">.</span><span class="na">enableLazyConditionProperty</span><span class="o">(</span><span class="s">"creditCardInfoLazyCondition"</span><span class="o">);</span>
+</pre></div>
+
+<p>or you can disable lazy condition property as:</p>
+
+<div class="highlight highlight-java"><pre><span class="n">rowMapperService</span><span class="o">.</span><span class="na">disableLazyConditionProperty</span><span class="o">(</span><span class="s">"creditCardInfoLazyCondition"</span><span class="o">);</span>
+</pre></div>
+
+<ol>
+<li>You can enable/disable lazy condition property automatically by using <strong><code>@RowMapperPropertyBasedLazyConditionAware</code></strong> annotation on any method of any class in Spring context before database access code is executed. To enable/disable this property on start of this method and on end of this method can be configured by <strong><code>options</code></strong> property.</li>
+</ol><p>For example you can setup lazy condition configuration automatically by annotation like:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@Override</span>
+<span class="nd">@RowMapperPropertyBasedLazyConditionAware</span><span class="o">(</span>
+    <span class="n">propertyName</span> <span class="o">=</span> <span class="s">"creditCardInfoLazyCondition"</span><span class="o">,</span>
+    <span class="n">options</span> <span class="o">=</span>   <span class="n">RowMapperPropertyBasedLazyConditionAware</span><span class="o">.</span><span class="na">ENABLE_ON_START</span> <span class="o">|</span> 
+                <span class="n">RowMapperPropertyBasedLazyConditionAware</span><span class="o">.</span><span class="na">DISABLE_ON_FINISH</span><span class="o">)</span>
+<span class="kd">public</span> <span class="n">CreditCardInfo</span> <span class="nf">getUserCreditCardInfo</span><span class="o">(</span><span class="n">Long</span> <span class="n">userId</span><span class="o">)</span> <span class="o">{</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>provideViaExpressionBasedProvider:</strong> With this configuration feature, you can use RXEL (ROMA Expression Language) expression language to evaluate lazy condition.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+    <span class="o">...</span>
+    <span class="n">lazyCondition</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperLazyCondition</span><span class="o">(</span>
+            <span class="n">provideViaExpressionBasedProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperExpressionBasedLazyConditionProvider</span><span class="o">(</span>
+                    <span class="n">expression</span> <span class="o">=</span> <span class="s">"${name}.equals(\"Member\")"</span><span class="o">)))</span>
+<span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Permission</span><span class="o">&gt;</span> <span class="n">permissions</span><span class="o">;</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>provideViaCustomProvider:</strong> With this configuration feature, you can use your custom lazy condition evaluater implementations by implementing <strong><code>org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperLazyCondition.RowMapperLazyConditionProvider</code></strong> interface for evaluating lazy condition as custom. Instance of your implementation is created once and used as singleton.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+    <span class="o">...</span>
+    <span class="n">lazyCondition</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperLazyCondition</span><span class="o">(</span>
+            <span class="n">provideViaCustomProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperCustomLazyConditionProvider</span><span class="o">(</span>
+                    <span class="n">lazyConditionProvider</span> <span class="o">=</span> <span class="n">UserRolesLazyConditionProvider</span><span class="o">.</span><span class="na">class</span><span class="o">)))</span>
+<span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="n">roles</span><span class="o">;</span>
+</pre></div>
+
+<p>and your custom lazy condition checker implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserRolesLazyConditionProvider</span> <span class="kd">implements</span> <span class="n">RowMapperLazyConditionProvider</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kd">static</span> <span class="n">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">UserRolesLazyConditionProvider</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">evaluateCondition</span><span class="o">(</span><span class="n">User</span> <span class="n">user</span><span class="o">,</span> <span class="n">String</span> <span class="n">fieldName</span><span class="o">,</span> <span class="n">ResultSet</span> <span class="n">rs</span><span class="o">,</span> <span class="kt">int</span> <span class="n">rowNum</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">boolean</span> <span class="n">conditionResult</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"Evaluated lazy condition of field "</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="n">fieldName</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span>  
+             <span class="s">" for user with id "</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="s">" as "</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="n">conditionResult</span> <span class="o">+</span> <span class="s">"\""</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">conditionResult</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p><a name="Section_4_12"></a></p>
+
+<h2>
+<a name="412-conditional-lazy-load-feature" class="anchor" href="#412-conditional-lazy-load-feature"><span class="octicon octicon-link"></span></a>4.12. Conditional Lazy-Load Feature</h2>
+
+<p>Conditional lazy-load feature can be configured by using <strong><code>@RowMapperLazyLoadCondition</code></strong> annotation in <strong><code>@RowMapperObjectField</code></strong> annotation with <strong><code>lazyLoadCondition</code></strong> attribute. With conditional lazy-load feature, you can control real object loading behaviour of any lazy field as dynamic at runtime. </p>
+
+<ul>
+<li>
+<strong>provideViaPropertyBasedProvider:</strong> With this configuration feature, you can attach a specific property to a lazy-load condition and enable/disable condition of this property is used to evaluate condition.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+    <span class="o">...</span>
+    <span class="n">lazyLoadCondition</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperLazyLoadCondition</span><span class="o">(</span>
+            <span class="n">provideViaPropertyBasedProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperPropertyBasedLazyLoadConditionProvider</span><span class="o">(</span>
+                    <span class="n">propertyName</span> <span class="o">=</span> <span class="s">"creditCardInfoLazyLoadCondition"</span><span class="o">)))</span>
+<span class="kd">private</span> <span class="n">CreditCardInfo</span> <span class="n">creditCardInfo</span><span class="o">;</span>
+</pre></div>
+
+<p>To enable/disable lazy-load condition property, there are two ways:</p>
+
+<ol>
+<li>You can enable/disable lazy-load condition property by using <strong><code>enableLazyLoadConditionProperty</code></strong> and <strong><code>disableLazyLoadConditionProperty</code></strong> methods of <strong><code>org.springframework.jdbc.roma.impl.service.RowMapperService</code></strong> service class.</li>
+</ol><p>For example you can get row mapper service class as:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@Autowired</span>
+<span class="kd">private</span> <span class="n">RowMapperService</span><span class="o">;</span>
+</pre></div>
+
+<p>and you can enable lazy-load condition property as:</p>
+
+<div class="highlight highlight-java"><pre><span class="n">rowMapperService</span><span class="o">.</span><span class="na">enableLazyLoadConditionProperty</span><span class="o">(</span><span class="s">"creditCardInfoLazyLoadCondition"</span><span class="o">);</span>
+</pre></div>
+
+<p>or you can disable lazy-load condition property as:</p>
+
+<div class="highlight highlight-java"><pre><span class="n">rowMapperService</span><span class="o">.</span><span class="na">disableLazyLoadConditionProperty</span><span class="o">(</span><span class="s">"creditCardInfoLazyLoadCondition"</span><span class="o">);</span>
+</pre></div>
+
+<ol>
+<li>You can enable/disable lazy-load condition property automatically by using <strong><code>@RowMapperPropertyBasedLazyLoadConditionAware</code></strong> annotation on any method of any class in Spring context before database access code is executed. To enable/disable this property on start of this method and on end of this method can be configured by <strong><code>options</code></strong> property.</li>
+</ol><p>For example you can setup lazy-load condition configuration automatically by annotation like:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@Override</span>
+<span class="nd">@RowMapperPropertyBasedLazyLoadConditionAware</span><span class="o">(</span>
+    <span class="n">propertyName</span> <span class="o">=</span> <span class="s">"creditCardInfoLazyLoadCondition"</span><span class="o">,</span>
+    <span class="n">options</span> <span class="o">=</span>   <span class="n">RowMapperPropertyBasedLazyLoadConditionAware</span><span class="o">.</span><span class="na">ENABLE_ON_START</span> <span class="o">|</span> 
+                <span class="n">RowMapperPropertyBasedLazyLoadConditionAware</span><span class="o">.</span><span class="na">DISABLE_ON_FINISH</span><span class="o">)</span>
+<span class="kd">public</span> <span class="n">CreditCardInfo</span> <span class="nf">getUserCreditCardInfo</span><span class="o">(</span><span class="n">Long</span> <span class="n">userId</span><span class="o">)</span> <span class="o">{</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>provideViaExpressionBasedProvider:</strong> With this configuration feature, you can use RXEL (ROMA Expression Language) expression language to evaluate lazy-load condition.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+    <span class="o">...</span>
+    <span class="n">lazyLoadCondition</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperLazyLoadCondition</span><span class="o">(</span>
+            <span class="n">provideViaExpressionBasedProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperExpressionBasedLazyLoadConditionProvider</span><span class="o">(</span>
+                    <span class="n">expression</span> <span class="o">=</span> <span class="s">"${name}.equals(\"Member\")"</span><span class="o">)))</span>
+<span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Permission</span><span class="o">&gt;</span> <span class="n">permissions</span><span class="o">;</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>provideViaCustomProvider:</strong> With this configuration feature, you can use your custom lazy-load condition evaluater implementations by implementing <strong><code>org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperLazyLoadCondition.RowMapperLazyLoadConditionProvider</code></strong> interface for evaluating lazy-load condition as custom. Instance of your implementation is created once and used as singleton.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+    <span class="o">...</span>
+    <span class="n">lazyLoadCondition</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperLazyLoadCondition</span><span class="o">(</span>
+            <span class="n">provideViaCustomProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperCustomLazyLoadConditionProvider</span><span class="o">(</span>
+                    <span class="n">lazyLoadConditionProvider</span> <span class="o">=</span> <span class="n">UserRolesLazyLoadConditionProvider</span><span class="o">.</span><span class="na">class</span><span class="o">)))</span>
+<span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="n">roles</span><span class="o">;</span>
+</pre></div>
+
+<p>and your custom lazy-load condition checker implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserRolesLazyLoadConditionProvider</span> <span class="kd">implements</span> <span class="n">RowMapperLazyLoadConditionProvider</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kd">static</span> <span class="n">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">UserRolesLazyLoadConditionProvider</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">evaluateCondition</span><span class="o">(</span><span class="n">User</span> <span class="n">user</span><span class="o">,</span> <span class="n">String</span> <span class="n">fieldName</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">boolean</span> <span class="n">conditionResult</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"Evaluated lazy-load condition of field "</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="n">fieldName</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span>  
+             <span class="s">" for user with id "</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="s">" as "</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="n">conditionResult</span> <span class="o">+</span> <span class="s">"\""</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">conditionResult</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p><a name="Section_4_13"></a></p>
+
+<h2>
+<a name="413-conditional-ignore-feature" class="anchor" href="#413-conditional-ignore-feature"><span class="octicon octicon-link"></span></a>4.13. Conditional Ignore Feature</h2>
+
+<p>Conditional ignore feature can be configured by using <strong><code>@RowMapperIgnoreCondition</code></strong> annotation in <strong><code>@RowMapperObjectField</code></strong> annotation with <strong><code>ignoreCondition</code></strong> attribute. With conditional ignore feature, you can control turning on/off of mapping behaviour of any field as dynamic at runtime. </p>
+
+<ul>
+<li>
+<strong>provideViaPropertyBasedProvider:</strong> With this configuration feature, you can attach a specific property to a ignore condition and enable/disable condition of this property is used to evaluate condition.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+    <span class="o">...</span>
+    <span class="n">ignoreCondition</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperIgnoreCondition</span><span class="o">(</span>
+            <span class="n">provideViaPropertyBasedProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperPropertyBasedIgnoreConditionProvider</span><span class="o">(</span>
+                    <span class="n">propertyName</span> <span class="o">=</span> <span class="s">"creditCardInfoIgnoreCondition"</span><span class="o">)))</span>
+<span class="kd">private</span> <span class="n">CreditCardInfo</span> <span class="n">creditCardInfo</span><span class="o">;</span>
+</pre></div>
+
+<p>To enable/disable ignore condition property, there are two ways:</p>
+
+<ol>
+<li>You can enable/disable ignore condition property by using <strong><code>enableIgnoreConditionProperty</code></strong> and <strong><code>disableIgnoreConditionProperty</code></strong> methods of <strong><code>org.springframework.jdbc.roma.impl.service.RowMapperService</code></strong> service class.</li>
+</ol><p>For example you can get row mapper service class as:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@Autowired</span>
+<span class="kd">private</span> <span class="n">RowMapperService</span><span class="o">;</span>
+</pre></div>
+
+<p>and you can enable ignore condition property as:</p>
+
+<div class="highlight highlight-java"><pre><span class="n">rowMapperService</span><span class="o">.</span><span class="na">enableIgnoreConditionProperty</span><span class="o">(</span><span class="s">"creditCardInfoIgnoreCondition"</span><span class="o">);</span>
+</pre></div>
+
+<p>or you can disable ignore condition property as:</p>
+
+<div class="highlight highlight-java"><pre><span class="n">rowMapperService</span><span class="o">.</span><span class="na">disableIgnoreConditionProperty</span><span class="o">(</span><span class="s">"creditCardInfoIgnoreCondition"</span><span class="o">);</span>
+</pre></div>
+
+<ol>
+<li>You can enable/disable ignore condition property automatically by using <strong><code>@RowMapperPropertyBasedIgnoreConditionAware</code></strong> annotation on any method of any class in Spring context before database access code is executed. To enable/disable this property on start of this method and on end of this method can be configured by <strong><code>options</code></strong> property.</li>
+</ol><p>For example you can setup ignore condition configuration automatically by annotation like:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@Override</span>
+<span class="nd">@RowMapperPropertyBasedIgnoreConditionAware</span><span class="o">(</span>
+    <span class="n">propertyName</span> <span class="o">=</span> <span class="s">"creditCardInfoIgnoreCondition"</span><span class="o">,</span>
+    <span class="n">options</span> <span class="o">=</span>   <span class="n">RowMapperPropertyBasedIgnoreConditionAware</span><span class="o">.</span><span class="na">ENABLE_ON_START</span> <span class="o">|</span> 
+                <span class="n">RowMapperPropertyBasedIgnoreConditionAware</span><span class="o">.</span><span class="na">DISABLE_ON_FINISH</span><span class="o">)</span>
+<span class="kd">public</span> <span class="n">CreditCardInfo</span> <span class="nf">getUserCreditCardInfo</span><span class="o">(</span><span class="n">Long</span> <span class="n">userId</span><span class="o">)</span> <span class="o">{</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>provideViaExpressionBasedProvider:</strong> With this configuration feature, you can use RXEL (ROMA Expression Language) expression language to evaluate ignore condition.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+    <span class="o">...</span>
+    <span class="n">ignoreCondition</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperIgnoreCondition</span><span class="o">(</span>
+            <span class="n">provideViaExpressionBasedProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperExpressionBasedIgnoreConditionProvider</span><span class="o">(</span>
+                    <span class="n">expression</span> <span class="o">=</span> <span class="s">"${name}.equals(\"Member\")"</span><span class="o">)))</span>
+<span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Permission</span><span class="o">&gt;</span> <span class="n">permissions</span><span class="o">;</span>
+</pre></div>
+
+<ul>
+<li>
+<strong>provideViaCustomProvider:</strong> With this configuration feature, you can use your custom ignore condition evaluater implementations by implementing <strong><code>org.springframework.jdbc.roma.api.config.provider.annotation.RowMapperIgnoreCondition.RowMapperIgnoreConditionProvider</code></strong> interface for evaluating ignore condition as custom. Instance of your implementation is created once and used as singleton.</li>
+</ul><p>For example:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+    <span class="o">...</span>
+    <span class="n">ignoreCondition</span> <span class="o">=</span> 
+        <span class="nd">@RowMapperIgnoreCondition</span><span class="o">(</span>
+            <span class="n">provideViaCustomProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperCustomIgnoreConditionProvider</span><span class="o">(</span>
+                    <span class="n">ignoreConditionProvider</span> <span class="o">=</span> <span class="n">UserRolesIgnoreConditionProvider</span><span class="o">.</span><span class="na">class</span><span class="o">)))</span>
+<span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="n">roles</span><span class="o">;</span>
+</pre></div>
+
+<p>and your custom ignore condition checker implementation is declared as like:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserRolesIgnoreConditionProvider</span> <span class="kd">implements</span> <span class="n">RowMapperIgnoreConditionProvider</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kd">static</span> <span class="n">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">UserRolesIgnoreConditionProvider</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">evaluateCondition</span><span class="o">(</span><span class="n">User</span> <span class="n">user</span><span class="o">,</span> <span class="n">String</span> <span class="n">fieldName</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">boolean</span> <span class="n">conditionResult</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"Evaluated ignore condition of field "</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="n">fieldName</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span>  
+             <span class="s">" for user with id "</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="s">" as "</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="n">conditionResult</span> <span class="o">+</span> <span class="s">"\""</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">conditionResult</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p><a name="Section_4_14"></a></p>
+
+<h2>
+<a name="414-other-features" class="anchor" href="#414-other-features"><span class="octicon octicon-link"></span></a>4.14. Other Features</h2>
+
+<ul>
+<li>
+<strong>Ignoring field:</strong> To hide field from row mapper, you can declare this field as <strong><code>transient</code></strong> or annotate it with <strong><code>@RowMapperIgnoreField</code></strong> annotation.</li>
+</ul><p><a name="Section_5"></a></p>
+
+<h1>
+<a name="5-a-simple-example" class="anchor" href="#5-a-simple-example"><span class="octicon octicon-link"></span></a>5. A Simple Example</h1>
+
+<p>Here is <code>User</code> class:  </p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperClass</span><span class="o">(</span><span class="n">objectProcessor</span> <span class="o">=</span> <span class="n">UserObjectProcessor</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">User</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">username</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">password</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">firstname</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">lastname</span><span class="o">;</span>
+    <span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+        <span class="n">provideViaCustomProvider</span> <span class="o">=</span> 
+            <span class="nd">@RowMapperCustomProvider</span><span class="o">(</span>
+                    <span class="n">fieldProvider</span> <span class="o">=</span> <span class="n">UserPhoneNumberFieldProvider</span><span class="o">.</span><span class="na">class</span><span class="o">))</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">phoneNumber</span><span class="o">;</span>
+    <span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+        <span class="n">provideViaExpressionProvider</span> <span class="o">=</span> 
+            <span class="nd">@RowMapperExpressionProvider</span><span class="o">(</span>
+                    <span class="n">expression</span> <span class="o">=</span> <span class="s">"new Address(&amp;{[string]city}, &amp;{[string]country})"</span><span class="o">,</span>
+                    <span class="n">usedClasses</span> <span class="o">=</span> <span class="o">{</span><span class="n">Address</span><span class="o">.</span><span class="na">class</span><span class="o">}))</span>
+    <span class="kd">private</span> <span class="n">Address</span> <span class="n">address</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kt">boolean</span> <span class="n">enabled</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">Gender</span> <span class="n">gender</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">Date</span> <span class="n">birthDate</span><span class="o">;</span>
+    <span class="nd">@RowMapperEnumField</span><span class="o">(</span><span class="n">enumStartValue</span> <span class="o">=</span> <span class="mi">1</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="n">Language</span> <span class="n">language</span><span class="o">;</span>
+    <span class="nd">@RowMapperEnumField</span><span class="o">(</span>
+            <span class="n">mapViaAutoMapper</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperEnumAutoMapper</span><span class="o">(</span>
+                        <span class="n">mapViaNumericValueNumericMappings</span> <span class="o">=</span> <span class="o">{</span>
+                                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">1</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">100</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">2</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">200</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">3</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">300</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">4</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">400</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">5</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">500</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">6</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">600</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumNumericValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">7</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">700</span><span class="o">)</span>
+                        <span class="o">}))</span>
+    <span class="kd">private</span> <span class="n">Occupation</span> <span class="n">occupation</span><span class="o">;</span>
+    <span class="nd">@RowMapperEnumField</span><span class="o">(</span>
+            <span class="n">mapViaAutoMapper</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperEnumAutoMapper</span><span class="o">(</span>
+                        <span class="n">mapViaStringValueNumericMappings</span> <span class="o">=</span> <span class="o">{</span>
+                                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"PRIMARY_SCHOOL"</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">1</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"SECONDARY_SCHOOL"</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">2</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"HIGH_SCHOOL"</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">3</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"BACHELOR"</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">4</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"MASTER"</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">5</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"PHD"</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">6</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"ASSOCIATE_PROFESSOR"</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">7</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"PROFESSOR"</span><span class="o">),</span>
+                                <span class="nd">@RowMapperEnumStringValueNumericMapping</span><span class="o">(</span><span class="n">mappingIndex</span> <span class="o">=</span> <span class="mi">8</span><span class="o">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"OTHER"</span><span class="o">)</span>
+                        <span class="o">}))</span>
+    <span class="kd">private</span> <span class="n">Education</span> <span class="n">education</span><span class="o">;</span>
+    <span class="nd">@RowMapperEnumField</span><span class="o">(</span>
+            <span class="n">mapViaNumericMapper</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperEnumNumericMapper</span><span class="o">(</span>
+                            <span class="n">mapper</span> <span class="o">=</span> <span class="n">BloodTypeEnumMapper</span><span class="o">.</span><span class="na">class</span><span class="o">))</span>
+    <span class="kd">private</span> <span class="n">BloodType</span> <span class="n">bloodType</span><span class="o">;</span>
+    <span class="nd">@RowMapperEnumField</span><span class="o">(</span>
+            <span class="n">mapViaStringMapper</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperEnumStringMapper</span><span class="o">(</span>
+                            <span class="n">mapper</span> <span class="o">=</span> <span class="n">MaritalStatusEnumMapper</span><span class="o">.</span><span class="na">class</span><span class="o">))</span>
+    <span class="kd">private</span> <span class="n">MaritalStatus</span> <span class="n">maritalStatus</span><span class="o">;</span>
+    <span class="nd">@RowMapperEnumField</span><span class="o">(</span><span class="n">useStringValue</span> <span class="o">=</span> <span class="kc">true</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="n">Religion</span> <span class="n">religion</span><span class="o">;</span>
+    <span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+            <span class="n">provideViaExpressionProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperExpressionProvider</span><span class="o">(</span>
+                        <span class="n">expression</span> <span class="o">=</span> <span class="s">"@{roleDAO}.getUserRoleList(${id})"</span><span class="o">),</span>      
+            <span class="n">lazy</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+            <span class="n">lazyCondition</span> <span class="o">=</span> 
+            <span class="nd">@RowMapperLazyCondition</span><span class="o">(</span>
+                    <span class="n">provideViaCustomProvider</span> <span class="o">=</span> 
+                        <span class="nd">@RowMapperCustomLazyConditionProvider</span><span class="o">(</span>
+                                <span class="n">lazyConditionProvider</span> <span class="o">=</span> <span class="n">UserRolesLazyConditionProvider</span><span class="o">.</span><span class="na">class</span><span class="o">)))</span>
+    <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="n">roles</span><span class="o">;</span>
+    <span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+            <span class="n">provideViaExpressionProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperExpressionProvider</span><span class="o">(</span>
+                    <span class="n">expression</span> <span class="o">=</span> <span class="s">"@{creditCardInfoDAO}.getUserCreditCardInfo(${id})"</span><span class="o">),</span>      
+            <span class="n">lazy</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+            <span class="n">lazyCondition</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperLazyCondition</span><span class="o">(</span>
+                    <span class="n">provideViaPropertyBasedProvider</span> <span class="o">=</span> 
+                        <span class="nd">@RowMapperPropertyBasedLazyConditionProvider</span><span class="o">(</span>
+                                <span class="n">propertyName</span> <span class="o">=</span> <span class="s">"creditCardInfoLazyCondition"</span><span class="o">)))</span>
+    <span class="kd">private</span> <span class="n">CreditCardInfo</span> <span class="n">creditCardInfo</span><span class="o">;</span>
+    <span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+            <span class="n">provideViaExpressionProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperExpressionProvider</span><span class="o">(</span>
+                    <span class="n">expression</span> <span class="o">=</span> <span class="s">"@{creditCardInfoDAO}.getUserSecondaryCreditCardInfo(${id})"</span><span class="o">),</span>     
+            <span class="n">lazy</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+            <span class="n">lazyCondition</span> <span class="o">=</span> 
+            <span class="nd">@RowMapperLazyCondition</span><span class="o">(</span>
+                    <span class="n">provideViaPropertyBasedProvider</span> <span class="o">=</span> 
+                        <span class="nd">@RowMapperPropertyBasedLazyConditionProvider</span><span class="o">(</span>
+                                <span class="n">propertyName</span> <span class="o">=</span> <span class="s">"creditCardInfoLazyCondition"</span><span class="o">)))</span>
+    <span class="kd">private</span> <span class="n">CreditCardInfo</span> <span class="n">secondaryCreditCardInfo</span><span class="o">;</span>
+    <span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+            <span class="n">provideViaExpressionProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperExpressionProvider</span><span class="o">(</span>
+                    <span class="n">expression</span> <span class="o">=</span> <span class="s">"@{creditCardInfoDAO}.getUserCreditCardInfo(${id})"</span><span class="o">),</span>      
+            <span class="n">ignoreCondition</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperIgnoreCondition</span><span class="o">(</span>
+                    <span class="n">provideViaPropertyBasedProvider</span> <span class="o">=</span> 
+                        <span class="nd">@RowMapperPropertyBasedIgnoreConditionProvider</span><span class="o">(</span>
+                                <span class="n">propertyName</span> <span class="o">=</span> <span class="s">"creditCardInfoIgnoreCondition"</span><span class="o">)))</span>
+    <span class="kd">private</span> <span class="n">CreditCardInfo</span> <span class="n">previousCreditCardInfo</span><span class="o">;</span>
+
+    <span class="nd">@RowMapperIgnoreField</span> <span class="c1">// Or define field as transient</span>
+    <span class="kd">private</span> <span class="kt">byte</span> <span class="n">age</span><span class="o">;</span>
+</pre></div>
+
+<p>Here is <code>Role</code> class:    </p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@RowMapperClass</span><span class="o">(</span><span class="n">objectCreater</span> <span class="o">=</span> <span class="n">RoleObjectCreater</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Role</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="o">;</span>
+    <span class="nd">@RowMapperField</span><span class="o">(</span><span class="n">fieldMapper</span> <span class="o">=</span> <span class="n">RoleNameFieldMapper</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">name</span><span class="o">;</span>
+    <span class="nd">@RowMapperObjectField</span><span class="o">(</span>
+            <span class="n">provideViaSqlProvider</span> <span class="o">=</span> 
+                <span class="nd">@RowMapperSqlProvider</span><span class="o">(</span>
+                    <span class="n">provideSql</span> <span class="o">=</span> 
+                        <span class="s">"SELECT p.* FROM PERMISSION p WHERE p.ID IN "</span> <span class="o">+</span>
+                        <span class="s">"("</span> <span class="o">+</span>
+                            <span class="s">"SELECT rp.PERMISSION_ID FROM role_permission rp WHERE rp.ROLE_ID = ${id}"</span> <span class="o">+</span>
+                        <span class="s">") ORDER BY p.name"</span><span class="o">,</span>
+                    <span class="n">entityType</span> <span class="o">=</span> <span class="n">Permission</span><span class="o">.</span><span class="na">class</span><span class="o">),</span>     
+            <span class="n">lazy</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+            <span class="n">lazyCondition</span> <span class="o">=</span> 
+            <span class="nd">@RowMapperLazyCondition</span><span class="o">(</span>
+                <span class="n">provideViaExpressionBasedProvider</span> <span class="o">=</span> 
+                    <span class="nd">@RowMapperExpressionBasedLazyConditionProvider</span><span class="o">(</span>
+                        <span class="n">expression</span> <span class="o">=</span> <span class="s">"${name}.equals(\"Member\")"</span><span class="o">)))</span>
+    <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Permission</span><span class="o">&gt;</span> <span class="n">permissions</span><span class="o">;</span>
+
+    <span class="o">...</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>Here is <code>BloodTypeEnumMapper</code> class:  </p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">BloodTypeEnumMapper</span> <span class="kd">implements</span> <span class="n">RowMapperEnumField</span><span class="o">.</span><span class="na">NumericEnumMapper</span><span class="o">&lt;</span><span class="n">BloodType</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">BloodType</span> <span class="nf">map</span><span class="o">(</span><span class="n">Integer</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="n">BloodType</span> <span class="n">bt</span> <span class="o">:</span> <span class="n">BloodType</span><span class="o">.</span><span class="na">values</span><span class="o">())</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">bt</span><span class="o">.</span><span class="na">getCode</span><span class="o">()</span> <span class="o">==</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="n">bt</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>   
+</pre></div>
+
+<p>Here is <code>MarialStatusEnumMapper</code> class:  </p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MaritalStatusEnumMapper</span> <span class="kd">implements</span> <span class="n">RowMapperEnumField</span><span class="o">.</span><span class="na">StringEnumMapper</span><span class="o">&lt;</span><span class="n">MaritalStatus</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">MaritalStatus</span> <span class="nf">map</span><span class="o">(</span><span class="n">String</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="n">MaritalStatus</span> <span class="n">ms</span> <span class="o">:</span> <span class="n">MaritalStatus</span><span class="o">.</span><span class="na">values</span><span class="o">())</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">ms</span><span class="o">.</span><span class="na">name</span><span class="o">().</span><span class="na">equalsIgnoreCase</span><span class="o">(</span><span class="n">value</span><span class="o">))</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="n">ms</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>   
+</pre></div>
+
+<p>Here is <code>UserPhoneNumberFieldProvider</code> class:  </p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserPhoneNumberFieldProvider</span> <span class="kd">implements</span> <span class="n">RowMapperFieldProvider</span><span class="o">&lt;</span><span class="n">User</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kd">static</span> <span class="n">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">UserPhoneNumberFieldProvider</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">provideField</span><span class="o">(</span><span class="n">User</span> <span class="n">user</span><span class="o">,</span> <span class="n">String</span> <span class="n">fieldName</span><span class="o">,</span> <span class="n">ResultSet</span> <span class="n">rs</span><span class="o">,</span> <span class="kt">int</span> <span class="n">rowNum</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">rs</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s">"phone_number"</span><span class="o">);</span>
+        <span class="o">}</span> 
+        <span class="k">catch</span> <span class="o">(</span><span class="n">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"Error occured while mapping field "</span> <span class="o">+</span> <span class="n">fieldName</span> <span class="o">+</span> <span class="s">" in User object from resultset"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>Here is <code>UserRolesLazyConditionProvider</code> class:  </p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserRolesLazyConditionProvider</span> <span class="kd">implements</span> <span class="n">RowMapperLazyConditionProvider</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kd">static</span> <span class="n">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">UserRolesLazyConditionProvider</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">evaluateCondition</span><span class="o">(</span><span class="n">User</span> <span class="n">user</span><span class="o">,</span> <span class="n">String</span> <span class="n">fieldName</span><span class="o">,</span> <span class="n">ResultSet</span> <span class="n">rs</span><span class="o">,</span> <span class="kt">int</span> <span class="n">rowNum</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">boolean</span> <span class="n">conditionResult</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"Evaluated lazy condition of field "</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="n">fieldName</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span>  
+             <span class="s">" for user with id "</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="s">" as "</span> <span class="o">+</span> <span class="s">"\""</span> <span class="o">+</span> <span class="n">conditionResult</span> <span class="o">+</span> <span class="s">"\""</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">conditionResult</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>   
+</pre></div>
+
+<p>Here is <code>UserObjectProcessor</code> class:  </p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserObjectProcessor</span> <span class="kd">implements</span> <span class="n">RowMapperObjectProcessor</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">"deprecation"</span><span class="o">)</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">processObject</span><span class="o">(</span><span class="n">User</span> <span class="n">user</span><span class="o">,</span> <span class="n">ResultSet</span> <span class="n">rs</span><span class="o">,</span> <span class="kt">int</span> <span class="n">rowNum</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getBirthDate</span><span class="o">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">user</span><span class="o">.</span><span class="na">setAge</span><span class="o">((</span><span class="kt">byte</span><span class="o">)(</span><span class="n">Calendar</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">getTime</span><span class="o">().</span><span class="na">getYear</span><span class="o">()</span> <span class="o">-</span> <span class="n">user</span><span class="o">.</span><span class="na">getBirthDate</span><span class="o">().</span><span class="na">getYear</span><span class="o">()));</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>Here is <code>RoleObjectCreater</code> class:  </p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RoleObjectCreater</span> <span class="kd">implements</span> <span class="n">RowMapperObjectCreater</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Role</span> <span class="nf">createObject</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="n">clazz</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">Role</span><span class="o">();</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>Here is <code>RoleNameFieldMapper</code> class:  </p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RoleNameFieldMapper</span> <span class="kd">implements</span> <span class="n">RowMapperFieldMapper</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">RoleNameFieldMapper</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">mapField</span><span class="o">(</span><span class="n">Role</span> <span class="n">role</span><span class="o">,</span> <span class="n">String</span> <span class="n">fieldName</span><span class="o">,</span> <span class="n">ResultSet</span> <span class="n">rs</span><span class="o">,</span> <span class="kt">int</span> <span class="n">rowNum</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">role</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s">"name"</span><span class="o">));</span>
+        <span class="o">}</span> 
+        <span class="k">catch</span> <span class="o">(</span><span class="n">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"Error occured while mapping field "</span> <span class="o">+</span> <span class="n">fieldName</span> <span class="o">+</span> 
+                    <span class="s">" in Role object from resultset"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>Here is <code>UserAccountInfoSqlQueryInfoProvider</code> class:  </p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserAccountInfoSqlQueryInfoProvider</span> <span class="kd">implements</span> <span class="n">RowMapperSqlQueryInfoProvider</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">SqlQueryInfo</span> <span class="nf">provideSqlQueryInfo</span><span class="o">(</span><span class="n">User</span> <span class="n">user</span><span class="o">,</span> <span class="n">String</span> <span class="n">fieldName</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> 
+            <span class="k">new</span> <span class="nf">SqlQueryInfo</span><span class="o">(</span>
+                <span class="s">"SELECT a.* FROM ACCOUNT_INFO a WHERE a.ID IN "</span> <span class="o">+</span>
+                <span class="s">"("</span> <span class="o">+</span>
+                    <span class="s">"SELECT ua.account_info_id FROM USER_ACCOUNT_INFO ua WHERE ua.user_id = ?"</span> <span class="o">+</span>
+                <span class="s">")"</span><span class="o">,</span>
+                <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span> <span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">});</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>Here is <code>CreditCardInfoJdbcDAO</code> class:  </p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@Repository</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="s">"creditCardInfoDAO_v2"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CreditCardInfoJdbcDAO</span> <span class="kd">extends</span> <span class="n">BaseJdbcDAO</span> <span class="kd">implements</span> <span class="n">CreditCardInfoDAO</span> <span class="o">{</span>
+
+    <span class="o">...</span>
+
+    <span class="nd">@Override</span>
+    <span class="nd">@RowMapperPropertyBasedLazyConditionAware</span><span class="o">(</span>
+        <span class="n">propertyName</span> <span class="o">=</span> <span class="s">"creditCardInfoLazyCondition"</span><span class="o">,</span>
+        <span class="n">options</span> <span class="o">=</span>   <span class="n">RowMapperPropertyBasedLazyConditionAware</span><span class="o">.</span><span class="na">ENABLE_ON_START</span> <span class="o">|</span> 
+                <span class="n">RowMapperPropertyBasedLazyConditionAware</span><span class="o">.</span><span class="na">DISABLE_ON_FINISH</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="n">CreditCardInfo</span> <span class="nf">getUserSecondaryCreditCardInfo</span><span class="o">(</span><span class="n">Long</span> <span class="n">userId</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"Getting secondary credit card info for user with id "</span> <span class="o">+</span> <span class="n">userId</span><span class="o">);</span>
+        <span class="k">return</span> 
+            <span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">queryForObject</span><span class="o">(</span>
+                <span class="s">"SELECT c.* FROM CREDIT_CARD_INFO c WHERE c.id = "</span> <span class="o">+</span>
+                <span class="s">"("</span> <span class="o">+</span>
+                    <span class="s">"SELECT uc.credit_card_info_id FROM USER_SECONDARY_CREDIT_CARD_INFO uc WHERE uc.user_id = "</span> <span class="o">+</span> <span class="n">userId</span> <span class="o">+</span>
+                <span class="s">")"</span><span class="o">,</span> 
+                <span class="n">creditCardInfoRowMapper</span><span class="o">);</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>You can get <code>User</code> entity rowmapper as follows:</p>
+
+<div class="highlight highlight-java"><pre><span class="nd">@Autowired</span>
+<span class="n">RowMapperService</span> <span class="n">rowMapperService</span><span class="o">;</span>
+
+<span class="o">...</span>
+
+<span class="n">RowMapper</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span> <span class="n">userRowMapper</span> <span class="o">=</span> <span class="n">rowMapperService</span><span class="o">.</span><span class="na">getRowMapper</span><span class="o">(</span><span class="n">User</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</pre></div>
+
+<p>In this example, we can get related <code>Role</code> entites of <code>User</code> entity with <strong><code>@RowMapperObjectField</code></strong> annotion automatically. 
+We use <strong><code>@RowMapperObjectField</code></strong> annotation for accessing related <code>Role</code> entites of <code>User</code> entity with <code>id</code> attribute of User. 
+We have <strong><code>lazy=true</code></strong> configuration, since <code>roles</code> field are initialized while we are accessing it first time. 
+If we don't access it, it will not be set. </p>
+
+<p>You can find all demo codes (including these samples above) at <a href="https://github.com/serkan-ozal/spring-jdbc-roma-demo">https://github.com/serkan-ozal/spring-jdbc-roma-demo</a></p>
+
+<p><a name="Section_6"></a> </p>
+
+<h1>
+<a name="6-roadmap" class="anchor" href="#6-roadmap"><span class="octicon octicon-link"></span></a>6. Roadmap</h1>
+
+<ul>
+<li><p>In addition to Annotation based configuration <strong>XML</strong> and <strong>Properties</strong> file based configuration support will be added.</p></li>
+<li><p>Spring context xml specific XSD will be defined and configuration can be done in Spring context xml by using <strong></strong> tags.</p></li>
+<li><p>Integration with <a href="https://github.com/nurkiewicz/spring-data-jdbc-repository">https://github.com/nurkiewicz/spring-data-jdbc-repository</a> which is Spring Data JDBC generic DAO implementation framework by <a href="https://github.com/nurkiewicz">Tomasz Nurkiewicz</a>.</p></li>
+<li><p>Generic DAO implementaion will be added for CRUD operations such as <strong>get</strong>, <strong>list</strong>, <strong>add</strong>, <strong>update</strong> and <strong>delete</strong> by considering object relations and different DBMS vendors (Oracle, MySQL, PostgreSQL, ...)</p></li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Spring-JDBC-ROMA maintained by <a href="https://github.com/serkan-ozal">serkan-ozal</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
