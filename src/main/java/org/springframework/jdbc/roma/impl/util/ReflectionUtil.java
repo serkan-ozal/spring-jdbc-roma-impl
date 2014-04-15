@@ -227,24 +227,7 @@ public class ReflectionUtil {
 	}
 
 	public static boolean isComplexType(Class<?> cls) {
-		if (isPrimitiveType(cls)) {
-			return false;
-		}
-		else if (cls.isEnum()) {
-			return false;
-		}
-		else if (cls.equals(String.class)) {
-			return false;
-		}
-		else if (isCollectionType(cls)) {
-			return false;
-		}
-		else if (List.class.isAssignableFrom(cls)) {
-			return false;
-		}
-		else {
-			return true;
-		}
+		return !(isPrimitiveType(cls));
 	}
 	
 	public static boolean isCollectionType(Class<?> cls) {

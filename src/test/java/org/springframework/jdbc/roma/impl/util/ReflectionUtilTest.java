@@ -95,20 +95,20 @@ public class ReflectionUtilTest {
 	@Test
 	public void isPrimitiveType() {
 		Assert.assertTrue(ReflectionUtil.isPrimitiveType(int.class));
-		Assert.assertTrue(ReflectionUtil.isPrimitiveType(Integer.class));
+		Assert.assertFalse(ReflectionUtil.isPrimitiveType(Integer.class));
 		Assert.assertFalse(ReflectionUtil.isPrimitiveType(SampleClass.class));
 	}
 	
 	@Test
 	public void isNonPrimitiveType() {
 		Assert.assertFalse(ReflectionUtil.isNonPrimitiveType(int.class));
-		Assert.assertFalse(ReflectionUtil.isNonPrimitiveType(Integer.class));
+		Assert.assertTrue(ReflectionUtil.isNonPrimitiveType(Integer.class));
 		Assert.assertTrue(ReflectionUtil.isNonPrimitiveType(SampleClass.class));
 	}
 	
 	@Test
 	public void isComplexType() {
-		Assert.assertFalse(ReflectionUtil.isComplexType(String.class));
+		Assert.assertTrue(ReflectionUtil.isComplexType(String.class));
 		Assert.assertTrue(ReflectionUtil.isComplexType(SampleClass.class));
 	}
 	
