@@ -7,7 +7,7 @@ CONTENTS
 - [4. Usage](#Section_4)
     * [4.1. Default configurations](#Section_4_1)
     * [4.2. Primitive Typed Field Features](#Section_4_2)
-    * [4.3. Date Typed Field Features](#Section_4_3)
+    * [4.3. Date/Timestamp Typed Field Features](#Section_4_3)
     * [4.4. Clob Typed Column Features](#Section_4_4)
     * [4.5. Blob Typed Column Features](#Section_4_5)
     * [4.6. Enum Typed Field Features](#Section_4_6)
@@ -38,7 +38,7 @@ these features can be customized with developer's extended classes. This is the 
 2. Features
 =======
 
-* All primitive types, strings, enums, dates, clob, blob, collections and complex objects are supported.  
+* All primitive types, string, enum, date/timestamp, clob, blob, collections and complex objects are supported.  
 
 * Writing your custom class (or type) based field generator factory, object creater, object processor, table name resolver, column name resolver implementations and customizable data source, schema, table names are supported.  
 
@@ -162,7 +162,7 @@ Default configurations can be configured programatically or in context xml of Sp
 typed fields are automatically mapped to result set in row mapper.
 
 <a name="Section_4_3"></a>
-4.3. Date Typed Field Features
+4.3. Date/Timestamp Typed Field Features
 -------
 
 `java.util.Date` typed fields are automatically mapped to result set as **Date** in row mapper. But if mapped column in database is defined as **Timestamp** typed, you can configure this field by using **`@RowMapperTimeField`** annotation as:
@@ -171,6 +171,8 @@ typed fields are automatically mapped to result set in row mapper.
 @RowMapperTimeField(asTimestamp = true)
 private Date date;
 ~~~~~
+
+In addition, `java.sql.Timestamp` typed fields are automatically mapped to result set as **Timestamp** in row mapper with no additional configuration. 
 
 <a name="Section_4_4"></a>
 4.4. Clob Typed Column Features
