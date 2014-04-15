@@ -189,31 +189,28 @@ public class ReflectionUtil {
 	}
 	
 	public static boolean isPrimitiveType(Class<?> cls) {
-		if (cls.equals(boolean.class) || cls.equals(Boolean.class)) {
+		if (cls.equals(boolean.class)) {
 			return true;
 		}	
-		else if (cls.equals(byte.class) || cls.equals(Byte.class)) {
+		else if (cls.equals(byte.class)) {
 			return true;
 		}	
-		else if (cls.equals(char.class) || cls.equals(Character.class)) {
+		else if (cls.equals(char.class)) {
 			return true;
 		}	
-		else if (cls.equals(short.class) || cls.equals(Short.class)) {
+		else if (cls.equals(short.class)) {
 			return true;
 		}	
-		else if (cls.equals(int.class) || cls.equals(Integer.class)) {
+		else if (cls.equals(int.class)) {
 			return true;
 		}	
-		else if (cls.equals(float.class) || cls.equals(Float.class)) {
+		else if (cls.equals(float.class)) {
 			return true;
 		}	
-		else if (cls.equals(long.class) || cls.equals(Long.class)) {
+		else if (cls.equals(long.class)) {
 			return true;
 		}	
-		else if (cls.equals(double.class) || cls.equals(Double.class)) {
-			return true;
-		}
-		else if (cls.equals(String.class)) {
+		else if (cls.equals(double.class)) {
 			return true;
 		}
 		else {

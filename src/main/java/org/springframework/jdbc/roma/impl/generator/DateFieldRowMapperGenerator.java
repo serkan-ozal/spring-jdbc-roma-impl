@@ -17,6 +17,7 @@
 package org.springframework.jdbc.roma.impl.generator;
 
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
 import java.util.Date;
 
 import org.springframework.jdbc.roma.api.config.manager.ConfigManager;
@@ -27,16 +28,26 @@ import org.springframework.jdbc.roma.api.domain.model.config.RowMapperTimeFieldC
  */
 public class DateFieldRowMapperGenerator<T> extends AbstractRowMapperFieldGenerator<T> {
 
+	private boolean asTimestamp = false;
+	
 	public DateFieldRowMapperGenerator(Field field, ConfigManager configManager) {
 		super(field, configManager);
+		if (Timestamp.class.isAssignableFrom(field.getType())) {
+			asTimestamp = true;
+		}
+		else {
+			RowMapperTimeFieldConfig timeFieldConfig = configManager.getRowMapperTimeFieldConfig(field);
+			if (timeFieldConfig != null && timeFieldConfig.isAsTimestamp()) {
+				asTimestamp = true;
+			}
+		}	
 	}
 	
 	@Override
 	public String doFieldMapping(Field f) {
 		String setterMethodName = getSetterMethodName(f);
 		String setValueExpr = null;
-		RowMapperTimeFieldConfig timeFieldConfig = configManager.getRowMapperTimeFieldConfig(f);
-		if (timeFieldConfig != null && timeFieldConfig.isAsTimestamp()) {
+		if (asTimestamp) {
 			setValueExpr = RESULT_SET_ARGUMENT + ".getTimestamp(\"" + columnName + "\")";
 		}
 		else {

@@ -124,7 +124,7 @@ public class DefaultRowMapperGeneratorFactory<T> implements RowMapperFieldGenera
 		else if (cls.equals(String.class) || cls.equals(String.class)) {
 			rmfg = new StringFieldRowMapperGenerator<T>(f, configManager);
 		}
-		else if (cls.equals(Date.class)) {
+		else if (Date.class.isAssignableFrom(cls)) {
 			rmfg = new DateFieldRowMapperGenerator<T>(f, configManager);
 		}
 		else if (cls.isEnum()) {
