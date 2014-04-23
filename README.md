@@ -1584,7 +1584,7 @@ public class UserAccountInfoSqlQueryInfoProvider implements RowMapperSqlQueryInf
 Here is `CreditCardInfoJdbcDAO` class:  
 
 ~~~~~ java
-@Repository(value="creditCardInfoDAO_v2")
+@Repository(value="creditCardInfoDAO")
 public class CreditCardInfoJdbcDAO extends BaseJdbcDAO implements CreditCardInfoDAO {
 
 	...
