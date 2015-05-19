@@ -1,3 +1,5 @@
+Build Status: ![Build Status](https://travis-ci.org/serkan-ozal/spring-jdbc-roma-impl.svg?branch=master)
+
 CONTENTS
 =======
 
