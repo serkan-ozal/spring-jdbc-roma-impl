@@ -3,7 +3,7 @@
   	<modelVersion>4.0.0</modelVersion>
   	<groupId>org.springframework</groupId>
   	<artifactId>spring-jdbc-roma</artifactId>
-  	<version>2.0.0-SNAPSHOT</version>
+  	<version>2.0.0.RELEASE</version>
     <name>Spring Framework JDBC RowMapper Extension Implementation</name>
     <url>https://github.com/serkan-ozal/spring-jdbc-roma-impl</url>
      
@@ -18,12 +18,12 @@
         <maven.resources.plugin.version>2.4</maven.resources.plugin.version>
         <maven.surefire.plugin.version>2.9</maven.surefire.plugin.version>
         
-        <spring-jdbc-roma-api-version>2.0.0-SNAPSHOT</spring-jdbc-roma-api-version>
+        <spring-jdbc-roma-api-version>2.0.0.RELEASE</spring-jdbc-roma-api-version>
         <spring-version>3.2.2.RELEASE</spring-version>
         <aspectj-version>1.6.11</aspectj-version>
         <log4j-version>1.2.17</log4j-version>
         <cglib-version>2.2.2</cglib-version>
-        <javassist-version>3.12.1.GA</javassist-version>
+        <javassist-version>3.19.0-GA</javassist-version>
 		<commonsdbcp-version>1.4</commonsdbcp-version>
 		<commonscollections-version>3.2.1</commonscollections-version>
 		<hsqldb-version>2.2.8</hsqldb-version>
@@ -127,7 +127,7 @@
 			<version>${log4j-version}</version>
 	    </dependency>
 		<dependency>
-			<groupId>javassist</groupId>
+			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
 			<version>${javassist-version}</version>
 		</dependency>
