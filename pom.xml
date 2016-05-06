@@ -180,15 +180,18 @@
 		
 	</dependencies>
     
-    <repositories>
+    <scm>
+        <connection>scm:git:https://github.com/serkan-ozal/spring-jdbc-roma-impl.git</connection>
+        <developerConnection>scm:git:git@github.com:serkan-ozal/spring-jdbc-roma-impl.git</developerConnection>
+        <url>https://github.com/serkan-ozal/spring-jdbc-roma-impl</url>
+        <tag>HEAD</tag>
+    </scm>
+    
+    <distributionManagement>
         <repository>
-            <id>nexus-maven-repository</id>
-            <url>https://maven-us.nuxeo.org/nexus/content/groups/public/</url>
+            <id>bintray</id>
+            <url>https://api.bintray.com/maven/serkan-ozal/maven/spring-jdbc-roma/;publish=1</url>
         </repository>
-		<repository>
-			<id>my-maven-repository</id>
-			<url>https://github.com/serkan-ozal/maven-repository/raw/master/</url>
-		</repository>
-	</repositories>
+    </distributionManagement>
     
 </project>
